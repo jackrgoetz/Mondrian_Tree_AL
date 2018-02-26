@@ -3,9 +3,14 @@ from LeafNode import LeafNode
 
 class test_LeafNode(unittest.TestCase):
 
+    '''Unit testing for LeafNode'''
+
     def setUp(self):
         self.test_leaf_empty = LeafNode()
-        self.test_leaf_good = LeafNode([1,2,3,4], [5,6,7,8,9,10], [[0,1], [0,1]])
+        self.test_leaf_good = LeafNode(
+            labelled_index=[1,2,3,4], 
+            unlabelled_index=[5,6,7,8,9,10], 
+            linear_dims=[[0,1], [0,1]])
 
     # Testing the subtree_linear_dim method
 

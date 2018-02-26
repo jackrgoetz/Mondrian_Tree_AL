@@ -33,6 +33,15 @@ class SplitNode:
                                    self.right_child.calculate_subtree_linear_dim())
         return self.subtree_linear_dim
 
+    def percolate_subtree_linear_dim_change(self, val):
+        '''Changes the value of the subtree linear dimension by val for this tree
+        and all it's parents. Should be the more efficient way of keeping track of
+        subtree_linear_dim during tree building time.
+        '''
+        self.subtree_linear_dim += val
+        if self.parent_node is not None:
+            self.parent_node.percolate_subtree_linear_dim_change(val)
+
     def leaf_for_point(self, data_point):
         if data_point[self.split_dim] < self.split_val:
             if self.left_child.is_leaf():
