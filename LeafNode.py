@@ -23,15 +23,18 @@ class LeafNode:
             len(self.labelled_index), len(self.unlabelled_index))
         return(print_str)
     
-    def pick_new_points(self, num_samples, auto_update_leaf = True):
+    def pick_new_points(self, num_samples, self_update = True, set_seed = None):
         # Returns the index of points to get labels for, and automatically adds
         # them the leafs labelled points by default
         if num_samples > len(self.unlabelled_index):
             raise ValueError('This leaf only has {} < {} unlabelled points'.format(
                 len(self.unlabelled_index), num_samples))
 
+        if set_seed is not None:
+            random.seed(set_seed)
+
         new_points = random.sample(self.unlabelled_index, num_samples)
-        if auto_update_leaf:
+        if self_update:
             self.extend_labelled_index(new_points)
             self.unlabelled_index = [x for x in self.unlabelled_index if x not in new_points]
 
@@ -60,7 +63,7 @@ class LeafNode:
     def extend_labelled_index(self, new_labelled):
         self.labelled_index.extend(new_labelled)
 
-    def get_labelled_iondex(self):
+    def get_labelled_index(self):
         return self.labelled_index
 
     def set_unlablled_index(self, new_unlablled_index):
