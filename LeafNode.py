@@ -17,6 +17,8 @@ class LeafNode:
         self.labelled_index = labelled_index
         self.unlabelled_index = unlabelled_index
         self.linear_dims = linear_dims
+        self.parent_node = parent_node
+        self.parent_branch = parent_branch
 
     def __str__(self):
         print_str = 'n_labelled = {}, n_unlabelled = {}, '.format(
