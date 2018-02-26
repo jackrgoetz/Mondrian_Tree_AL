@@ -11,11 +11,25 @@ class test_LeafNode(unittest.TestCase):
             labelled_index=[1,2,3,4], 
             unlabelled_index=[5,6,7,8,9,10], 
             linear_dims=[[0,1], [0,1]])
+        self.test_leaf_neg = LeafNode(
+            labelled_index=[1,2,3,4], 
+            unlabelled_index=[5,6,7,8,9,10], 
+            linear_dims=[[-2,-1], [-2,-1]])
+        self.test_leaf_mixed = LeafNode(
+            labelled_index=[1,2,3,4], 
+            unlabelled_index=[5,6,7,8,9,10], 
+            linear_dims=[[-1,1], [-1,1]])
 
     # Testing the subtree_linear_dim method
 
     def test_dim_length_good(self):
         self.assertEqual(self.test_leaf_good.subtree_linear_dim, 2)
+
+    def test_dim_length_neg(self):
+        self.assertEqual(self.test_leaf_neg.subtree_linear_dim, 2)
+
+    def test_dim_length_mixed(self):
+        self.assertEqual(self.test_leaf_mixed.subtree_linear_dim, 4)
 
     def test_dim_length_empty(self):
         self.assertEqual(self.test_leaf_empty.subtree_linear_dim, 0)
