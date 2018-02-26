@@ -10,10 +10,10 @@ class test_LeafNode(unittest.TestCase):
     # Testing the subtree_linear_dim method
 
     def test_dim_length_good(self):
-        self.assertEqual(self.test_leaf_good.get_subtree_linear_dim(), 2)
+        self.assertEqual(self.test_leaf_good.subtree_linear_dim, 2)
 
     def test_dim_length_empty(self):
-        self.assertEqual(self.test_leaf_empty.get_subtree_linear_dim(), 0)
+        self.assertEqual(self.test_leaf_empty.subtree_linear_dim, 0)
 
     # Testing the pick_new_points method
 
@@ -30,13 +30,13 @@ class test_LeafNode(unittest.TestCase):
 
     def test_pick_new_points_self_update_true(self):
         self.test_leaf_good.pick_new_points(1, set_seed=1)
-        self.assertEqual(self.test_leaf_good.get_labelled_index(),[1,2,3,4,6])
-        self.assertEqual(self.test_leaf_good.get_unlabelled_index(),[5,7,8,9,10])
+        self.assertEqual(self.test_leaf_good.labelled_index,[1,2,3,4,6])
+        self.assertEqual(self.test_leaf_good.unlabelled_index,[5,7,8,9,10])
 
     def test_pick_new_points_self_update_false(self):
         self.test_leaf_good.pick_new_points(1, self_update = False, set_seed=1)
-        self.assertEqual(self.test_leaf_good.get_labelled_index(),[1,2,3,4])
-        self.assertEqual(self.test_leaf_good.get_unlabelled_index(),[5,6,7,8,9,10])
+        self.assertEqual(self.test_leaf_good.labelled_index,[1,2,3,4])
+        self.assertEqual(self.test_leaf_good.unlabelled_index,[5,6,7,8,9,10])
 
 if __name__ == '__main__':
     unittest.main()

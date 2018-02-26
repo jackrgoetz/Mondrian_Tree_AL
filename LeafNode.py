@@ -19,6 +19,7 @@ class LeafNode:
         self.linear_dims = linear_dims
         self.parent_node = parent_node
         self.parent_branch = parent_branch
+        self.subtree_linear_dim = self.calculate_subtree_linear_dim()
 
     def __str__(self):
         print_str = 'n_labelled = {}, n_unlabelled = {}, '.format(
@@ -42,7 +43,7 @@ class LeafNode:
 
         return new_points
 
-    def get_subtree_linear_dim(self):
+    def calculate_subtree_linear_dim(self):
         # Since this 'subtree' is only the leaf, it's linear dim is just the
         # sum of its linear dims
 
@@ -54,36 +55,17 @@ class LeafNode:
 
     ###########################################
 
-    # Basic functions
+    # Basic methods
 
     def is_leaf(self):
         return True
 
-    def set_labelled_index(self, new_labelled_index):
-        self.labelled_index = new_labelled_index
-
     def extend_labelled_index(self, new_labelled):
         self.labelled_index.extend(new_labelled)
-
-    def get_labelled_index(self):
-        return self.labelled_index
-
-    def set_unlablled_index(self, new_unlablled_index):
-        self.unlabelled_index = new_unlablled_index
 
     def extend_unlabllerd_index(self, new_unlabelled):
         self.unlabelled_index.extend(new_unlabelled)
 
-    def get_unlabelled_index(self):
-        return self.unlabelled_index
-
     def set_linear_dims(self, new_linear_dims):
         self.linear_dims = new_linear_dims
-
-    def get_linear_dims(self):
-        return self.linear_dims
-
-
-
-
-
+        self.subtree_linear_dim = self.calculate_subtree_linear_dim()
