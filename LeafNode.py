@@ -29,8 +29,13 @@ class LeafNode:
         self.leaf_id = LeafNode.leaf_ids
 
     def __str__(self):
-        print_str = 'n_labelled = {}, n_unlabelled = {}, '.format(
-            len(self.labelled_index), len(self.unlabelled_index))
+        print_str = '\
+        n_labelled = {}\n\
+        n_unlabelled = {}\n\
+        leaf_id = {}'.format(
+            len(self.labelled_index), 
+            len(self.unlabelled_index),
+            self.leaf_id)
         return(print_str)
     
     def pick_new_points(self, num_samples, self_update = True, set_seed = None):

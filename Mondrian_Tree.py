@@ -30,6 +30,9 @@ class Mondrian_Tree:
         self._life_time = 0
         self._num_leaves = 1
 
+        self.full_leaf_list = []
+        self._full_leaf_list_up_to_date = False
+
         self._verbose = False # useful for debugging or seeing how things work
 
     def __str__(self):
@@ -56,6 +59,11 @@ class Mondrian_Tree:
 
         old_life_time = self._life_time
         self._life_time = new_life_time
+
+        # Indicating we are growing our tree so the full leaf list will be wrong
+
+        self.full_leaf_list = []
+        self._full_leaf_list_up_to_date = False
 
         # We add new splits until the next split is after the new life time
 
@@ -159,6 +167,23 @@ class Mondrian_Tree:
 
             next_split_time = next_split_time + random.expovariate(self._root.subtree_linear_dim)
 
+    def make_full_leaf_list(self):
+        '''Makes a list with pointers to every leaf in the tree. Likely to be expensive so 
+        only do this if you're pre-building a tree for extensive use later. 
+        '''
 
+        full_leaf_list = []
+
+        def internal_dfs(node):
+
+            if node.is_leaf():
+                full_leaf_list.append(node)
+            else:
+                internal_dfs(node.left_child)
+                internal_dfs(node.right_child)
+
+        internal_dfs(self._root)
+        self.full_leaf_list = full_leaf_list
+        self._full_leaf_list_up_to_date = True
 
 
