@@ -109,6 +109,8 @@ class Mondrian_Tree:
             right_linear_dims = copy.deepcopy(curr_node.linear_dims)
             right_linear_dims[split_dim] = [split_val,split_interval[1]]
 
+            # Build the new split and leaf nodes
+
             new_left_node = LeafNode(linear_dims = left_linear_dims, parent_branch = 0)
             new_right_node = LeafNode(linear_dims = right_linear_dims, parent_branch = 1)
             new_split_node = SplitNode(
@@ -122,6 +124,8 @@ class Mondrian_Tree:
 
             new_split_node.left_child.parent_node = new_split_node
             new_split_node.right_child.parent_node = new_split_node
+
+            
 
 
 
