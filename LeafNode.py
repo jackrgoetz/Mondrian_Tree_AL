@@ -7,7 +7,7 @@ class LeafNode:
     Args:
         labelled_index (list): Index for labelled data points in the leaf.
         unlabelled_index (list): Index for unlabelled data points in the leaf.
-        linear_dims (list): A p dim list of tuples indicating the upper and 
+        linear_dims (list): A p dim list of 2 dim lists indicating the upper and 
         lower bounds of the leaf.
         parent_node (SplitNode): This node's parent
         parent_branch (int): This node's branch (0 for left, 1 for right)
