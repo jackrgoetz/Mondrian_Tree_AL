@@ -173,9 +173,7 @@ class Mondrian_Tree:
         '''
 
         full_leaf_list = []
-
         def internal_dfs(node):
-
             if node.is_leaf():
                 full_leaf_list.append(node)
             else:

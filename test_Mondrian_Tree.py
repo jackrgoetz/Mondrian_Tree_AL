@@ -12,6 +12,8 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.linear_dims = [[0,1]]*self.d
         self.mt1 = Mondrian_Tree(self.linear_dims)
 
+    # Basic tests
+
     def test_update_first_life_time_0p1(self):
         temp = Mondrian_Tree([[0,1]]*5)
         temp.update_life_time(0.1,set_seed=1)
@@ -27,16 +29,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         temp.update_life_time(1,set_seed=1)
         self.assertEqual(temp._num_leaves,36)
 
-    def test_expected_split_bound(self):
-        reps = 100
-        tot = 0
-        lbda = 0.5
-        for i in range(reps):
-            temp = Mondrian_Tree(self.linear_dims)
-            temp.update_life_time(lbda,set_seed=i)
-            tot += temp._num_leaves - 1
-        # print(tot/reps, ((1+lbda)*math.exp(1))**self.d)
-        self.assertTrue(tot/reps< ((1+lbda)*math.exp(1))**self.d)
+    # Testing make leaf list 
 
     def test_make_full_leaf_list_base(self):
         self.mt1.make_full_leaf_list()
@@ -49,10 +42,24 @@ class test_Mondrian_Tree(unittest.TestCase):
         # print(len(self.mt1.full_leaf_list))
         self.assertEqual(len(self.mt1.full_leaf_list),self.mt1._num_leaves)
 
+    # Testing theoretical bounds
+
+    def test_expected_split_bound(self):
+        reps = 100
+        tot = 0
+        lbda = 5
+        d = 3
+        for i in range(reps):
+            temp = Mondrian_Tree([[0,1]]*d)
+            temp.update_life_time(lbda,set_seed=i)
+            tot += temp._num_leaves - 1
+        # print(tot/reps, ((1+lbda)*math.exp(1))**d)
+        self.assertTrue(tot/reps< ((1+lbda)*math.exp(1))**d)
+
 
     def test_expected_cell_diameter(self):
         tot = 0
-        lbda = 3
+        lbda = 5
         self.mt1.update_life_time(lbda, set_seed=1)
         self.mt1.make_full_leaf_list()
         for node in self.mt1.full_leaf_list:
