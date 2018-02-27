@@ -1,4 +1,5 @@
 import random
+import math
 
 class LeafNode:
 
@@ -12,6 +13,9 @@ class LeafNode:
         parent_node (SplitNode): This node's parent
         parent_branch (int): This node's branch (0 for left, 1 for right)
     '''
+
+    leaf_ids = 0
+
     def __init__(self, labelled_index=[], unlabelled_index=[],linear_dims=[],
         parent_node=None, parent_branch=None):
         self.labelled_index = labelled_index
@@ -20,6 +24,9 @@ class LeafNode:
         self.parent_node = parent_node
         self.parent_branch = parent_branch
         self.subtree_linear_dim = self.calculate_subtree_linear_dim()
+
+        LeafNode.leaf_ids+= 1
+        self.leaf_id = LeafNode.leaf_ids
 
     def __str__(self):
         print_str = 'n_labelled = {}, n_unlabelled = {}, '.format(
@@ -69,3 +76,11 @@ class LeafNode:
     def set_linear_dims(self, new_linear_dims):
         self.linear_dims = new_linear_dims
         self.subtree_linear_dim = self.calculate_subtree_linear_dim()
+
+    def calculate_cell_l2_diameter(self):
+
+        tot = 0
+        for pair in self.linear_dims:
+            tot += (pair[1] - pair[0])**2
+
+        return math.sqrt(tot)

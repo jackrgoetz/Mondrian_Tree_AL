@@ -6,6 +6,7 @@ class test_LeafNode(unittest.TestCase):
     '''Unit testing for LeafNode'''
 
     def setUp(self):
+        LeafNode.leaf_ids = 0
         self.test_leaf_empty = LeafNode()
         self.test_leaf_good = LeafNode(
             labelled_index=[1,2,3,4], 
@@ -19,6 +20,12 @@ class test_LeafNode(unittest.TestCase):
             labelled_index=[1,2,3,4], 
             unlabelled_index=[5,6,7,8,9,10], 
             linear_dims=[[-1,1], [-1,1]])
+
+    # Testing the leaf ids
+
+    def test_leaf_id(self):
+        self.assertEqual(self.test_leaf_empty.leaf_id,1)
+        self.assertEqual(self.test_leaf_good.leaf_id,2)
 
     # Testing the subtree_linear_dim method
 
@@ -56,6 +63,9 @@ class test_LeafNode(unittest.TestCase):
         self.test_leaf_good.pick_new_points(1, self_update = False, set_seed=1)
         self.assertEqual(self.test_leaf_good.labelled_index,[1,2,3,4])
         self.assertEqual(self.test_leaf_good.unlabelled_index,[5,6,7,8,9,10])
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

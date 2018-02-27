@@ -1,5 +1,7 @@
 import random
 import copy
+import utils
+
 from LeafNode import LeafNode
 from SplitNode import SplitNode
 
@@ -26,7 +28,7 @@ class Mondrian_Tree:
         self._num_points = 0
 
         self._life_time = 0
-        self._num_leaves = 0
+        self._num_leaves = 1
 
         self._verbose = False # useful for debugging or seeing how things work
 
@@ -60,12 +62,14 @@ class Mondrian_Tree:
         if set_seed is not None:
             random.seed(set_seed)
 
-        next_split_time = old_life_time + random.expoariate(self._root.subtree_linear_dim)
+        next_split_time = old_life_time + random.expovariate(self._root.subtree_linear_dim)
         while next_split_time < self._life_time:
 
             # We need to pick which leaf to split. We move down the tree, moving left or 
             # right proportional to the linear_dim of all leaves in that subtree 
             # which is the subtree_linear_dim parameter of each node.
+
+            self._num_leaves += 1
 
             curr_node = self._root
             while not curr_node.is_leaf():
@@ -74,7 +78,7 @@ class Mondrian_Tree:
                 right_prob = curr_node.right_child.subtree_linear_dim
 
                 left_prob = left_prob / (left_prob + right_prob)
-                right_prob = right_prob / (left_prob + right+prob)
+                right_prob = right_prob / (left_prob + right_prob)
 
                 rand_split_val = random.random()
 
@@ -100,7 +104,7 @@ class Mondrian_Tree:
             for pair in curr_node.linear_dims:
                 dimension_probs.append(abs(pair[1] - pair[0])/curr_node.subtree_linear_dim)
 
-            split_dim = random.choices(range(self._num_dimensions), weights=dimension_probs)
+            split_dim = utils.choices(range(self._num_dimensions), weights=dimension_probs)[0]
             split_interval = curr_node.linear_dims[split_dim]
             split_val = random.uniform(split_interval[0], split_interval[1])
 
@@ -153,7 +157,7 @@ class Mondrian_Tree:
             for ind in curr_node.unlabelled_index:
                 new_split_node.leaf_for_point(self.points[ind]).extend_unlabelled_index(ind)
 
-            next_split_time = next_split_time + random.expoariate(self._root.subtree_linear_dim)
+            next_split_time = next_split_time + random.expovariate(self._root.subtree_linear_dim)
 
 
 
