@@ -21,7 +21,7 @@ class Mondrian_Tree:
         self._root = LeafNode(linear_dims = self._max_linear_dims)
         self._num_dimensions = len(linear_dims)
 
-        self.covariates = None
+        self.points = None
         self.labels = None
         self._num_points = 0
 
@@ -125,9 +125,35 @@ class Mondrian_Tree:
             new_split_node.left_child.parent_node = new_split_node
             new_split_node.right_child.parent_node = new_split_node
 
-            
+            # Putting the new nodes into the tree
 
+            if curr_node.parent_node is not None:
+                if curr_node.parent_branch == 0:
+                    curr_node.parent_node.left_child = new_split_node
+                else:
+                    curr_node.parent_node.right_child = new_split_node
 
+            else:
+                self._root = new_split_node
+
+            # Percolating up the change in subtree_lin_dim
+
+            subtree_lin_dim_change = (
+                new_left_node.subtree_linear_dim + 
+                new_right_node.subtree_linear_dim -
+                curr_node.subtree_linear_dim)
+
+            new_split_node.percolate_subtree_linear_dim_change(subtree_lin_dim_change)
+
+            # moving data points into the new leaves
+
+            for ind in curr_node.labelled_index:
+                new_split_node.leaf_for_point(self.points[ind]).extend_labelled_index(ind)
+
+            for ind in curr_node.unlabelled_index:
+                new_split_node.leaf_for_point(self.points[ind]).extend_unlabelled_index(ind)
+
+            next_split_time = next_split_time + random.expoariate(self._root.subtree_linear_dim)
 
 
 
