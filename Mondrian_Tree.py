@@ -170,7 +170,7 @@ class Mondrian_Tree:
 
             next_split_time = next_split_time + random.expovariate(self._root.subtree_linear_dim)
 
-    def input_data(all_data, labelled_indicies, labels):
+    def input_data(self,all_data, labelled_indicies, labels):
         '''Puts in data for Mondrian Tree. 
         all_data should be a list of lists (or numpy array, points by row) with all data points, 
         labelled_indicies should be a list of the indicies for data points which we have the
@@ -182,6 +182,11 @@ class Mondrian_Tree:
 
         if len(labelled_indicies) != len(labels):
             raise ValueError('Labelled indicies list and labels list must be same length')
+
+        for point in all_data:
+            if len(point) != self._num_dimensions:
+                raise ValueError('All data points must be of the dimension on which this \
+                    Mondrian Tree is built ({})'.format(self._num_dimensions))
 
         self.points = all_data
         self._num_points = len(self.points)

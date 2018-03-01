@@ -6,7 +6,7 @@ class test_Mondrian_Tree(unittest.TestCase):
 
     def setUp(self):
 
-        self.d = 5
+        self.d = 3
         self.n = 1000
         self.a = 1
         self.linear_dims = [[0,1]]*self.d
@@ -45,7 +45,28 @@ class test_Mondrian_Tree(unittest.TestCase):
     # Testing input data
 
     def test_input_data_empty_root(self):
+        self.mt1.input_data([],[],[])
+        self.assertEqual(self.mt1._num_points,0)
 
+    def test_input_data_empty(self):
+        lbda = 1
+        self.mt1.update_life_time(lbda, set_seed=1)
+        self.mt1.input_data([],[],[])
+        self.assertEqual(self.mt1._num_points,0)
+
+    def test_input_data_root_no_labels(self):
+        self.mt1.input_data([[0]*self.d],[],[])
+        self.assertEqual(self.mt1._num_points,1)
+        self.assertEqual(self.mt1.labels,[None])
+        self.assertEqual(self.mt1._root.unlabelled_index,[0])
+        self.assertEqual(self.mt1._root.labelled_index,[])
+
+    def test_input_data_root_labels(self):
+        self.mt1.input_data([[0]*self.d],[0],[3.141])
+        self.assertEqual(self.mt1._num_points,1)
+        self.assertEqual(self.mt1.labels,[3.141])
+        self.assertEqual(self.mt1._root.unlabelled_index,[])
+        self.assertEqual(self.mt1._root.labelled_index,[0])
 
     # Testing calculating leaf variances
 
