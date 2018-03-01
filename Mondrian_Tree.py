@@ -172,8 +172,6 @@ class Mondrian_Tree:
             for ind in curr_node.unlabelled_index:
                 new_split_node.leaf_for_point(self.points[ind]).extend_unlabelled_index(ind)
 
-            curr_node = None
-
             next_split_time = next_split_time + random.expovariate(self._root.subtree_linear_dim)
 
     def input_data(self, all_data, labelled_indicies, labels):
@@ -242,9 +240,12 @@ class Mondrian_Tree:
             self.make_full_leaf_list()
             print('Done!')
 
+        var_list = []
         for i, node in enumerate(self._full_leaf_list):
             label_list = [self.labels[x] for x in node.labelled_index]
-            self._full_leaf_var_list[i] = utils.unbiased_var(label_list)
+            var_list.append(utils.unbiased_var(label_list))
+
+        self._full_leaf_var_list = var_list
 
 
 
