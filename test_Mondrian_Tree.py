@@ -7,7 +7,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     def setUp(self):
 
         self.d = 3
-        self.n = 1000
+        self.n = 10
         self.a = 1
         self.linear_dims = [[0,1]]*self.d
         self.mt1 = Mondrian_Tree(self.linear_dims)
@@ -153,10 +153,10 @@ class test_Mondrian_Tree(unittest.TestCase):
                 self.d * (1+ (lbda * delta)/math.sqrt(self.d))*
                 math.exp(-lbda * delta/math.sqrt(self.d)))
 
-    # def test_update_life_time_tuned(self):
+    def test_update_life_time_tuned(self):
 
-    #     self.mt1.update_life_time(self.a * self.n**(1/(2+self.d)),set_seed=4)
-    #     self.assertEqual(self.mt1._num_leaves,1)
+        self.mt1.update_life_time(self.a * self.n**(1/(2+self.d) - 1),set_seed=1)
+        self.assertEqual(self.mt1._num_leaves,1)
 
 
 
