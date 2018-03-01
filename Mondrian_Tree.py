@@ -214,6 +214,9 @@ class Mondrian_Tree:
                 curr_leaf = self._root.leaf_for_point(self.points[i])
                 curr_leaf.unlabelled_index.append(i)
 
+    ###########################################
+
+    # Basic methods
 
     def make_full_leaf_list(self):
         '''Makes a list with pointers to every leaf in the tree. Likely to be expensive so 
@@ -234,6 +237,22 @@ class Mondrian_Tree:
             node.full_leaf_list_pos = i
         self._full_leaf_list_up_to_date = True
 
+    def make_full_leaf_mean_list(self):
+        if not self._full_leaf_list_up_to_date:
+            print('Making full leaf list. Please wait')
+            self.make_full_leaf_list()
+            print('Done!')
+
+        mean_list = []
+        for i, node in enumerate(self._full_leaf_list):
+            label_list = [self.labels[x] for x in node.labelled_index]
+            if len(label_list) != 0:
+                mean_list.append(sum(label_list)/len(label_list))
+            else:
+                mean_list.append(0)
+
+        self._full_leaf_mean_list = mean_list
+
     def make_full_leaf_var_list(self):
         if not self._full_leaf_list_up_to_date:
             print('Making full leaf list. Please wait')
@@ -246,6 +265,28 @@ class Mondrian_Tree:
             var_list.append(utils.unbiased_var(label_list))
 
         self._full_leaf_var_list = var_list
+
+    def make_full_leaf_marginal_list(self):
+        if not self._full_leaf_list_up_to_date:
+            print('Making full leaf list. Please wait')
+            self.make_full_leaf_list()
+            print('Done!')
+
+        marginal_list = []
+        for i, node in enumerate(self._full_leaf_list):
+            points_list = (
+                [self.points[x] for x in node.unlabelled_index]+
+                [self.points[x] for x in node.labelled_index])
+            marginal_list.append(len(points_list)/self._num_points)
+
+        self._full_leaf_marginal_list = marginal_list
+
+    def update_leaf_lists(self):
+        self.make_full_leaf_list()
+        self.make_full_leaf_mean_list()
+        self.make_full_leaf_var_list()
+        self.make_full_leaf_marginal_list()
+
 
 
 
