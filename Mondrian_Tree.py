@@ -26,6 +26,7 @@ class Mondrian_Tree:
         self.points = None
         self.labels = None
         self._num_points = 0
+        self._num_labelled = 0
 
         self._life_time = 0
         self._num_leaves = 1
@@ -190,6 +191,7 @@ class Mondrian_Tree:
 
         self.points = all_data
         self._num_points = len(self.points)
+        self._num_labelled = len(labels)
         temp = [None] * self._num_points
         for i,ind in enumerate(labelled_indicies):
             temp[ind] = labels[i]

@@ -68,6 +68,40 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.assertEqual(self.mt1._root.unlabelled_index,[])
         self.assertEqual(self.mt1._root.labelled_index,[0])
 
+    def test_input_data(self):
+        d = 3
+        lbda = 0.5
+        n_points = 100
+        n_labelled = 20
+        temp = Mondrian_Tree([[0,1]]*d)
+        temp.update_life_time(lbda, set_seed=1)
+
+        labelled_indicies = range(n_labelled)
+        labels = [1]*n_labelled
+        data = []
+        random.seed(1)
+        for i in range(n_points):
+            point = []
+            for j in range(d):
+                point.append(random.random())
+            data.append(point)
+        temp.input_data(data, labelled_indicies, labels)
+
+        self.assertEqual(temp._num_points,100)
+        self.assertEqual(temp._num_labelled,20)
+
+        if self.long_test:
+            temp.make_full_leaf_list()
+            for node in temp._full_leaf_list:
+                print(len(node.labelled_index), len(node.unlabelled_index))
+
+                linear_dims = node.linear_dims
+                for ind in node.labelled_index:
+                    point = temp.points[ind]
+                    for dim in range(d):
+                        self.assertTrue(point[dim] > linear_dims[dim][0])
+                        self.assertTrue(point[dim] < linear_dims[dim][1])
+
     # Testing calculating leaf variances
 
     # UNFINISHED
