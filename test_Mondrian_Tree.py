@@ -1,6 +1,9 @@
 import unittest
 import math
+import random
 from Mondrian_Tree import Mondrian_Tree
+from LeafNode import LeafNode
+
 
 class test_Mondrian_Tree(unittest.TestCase):
 
@@ -11,6 +14,8 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.a = 1
         self.linear_dims = [[0,1]]*self.d
         self.mt1 = Mondrian_Tree(self.linear_dims)
+
+        self.long_test = True
 
     # Basic tests
 
@@ -40,6 +45,8 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.mt1.update_life_time(lbda,set_seed=1)
         self.mt1.make_full_leaf_list()
         # print(len(self.mt1._full_leaf_list))
+        # for node in self.mt1._full_leaf_list:
+        #     print(node.leaf_id)
         self.assertEqual(len(self.mt1._full_leaf_list),self.mt1._num_leaves)
 
     # Testing input data
@@ -73,8 +80,8 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         n_points = 100
         n_labelled = 20
-        temp = Mondrian_Tree([[0,1]]*d)
-        temp.update_life_time(lbda, set_seed=1)
+        temp_tree = Mondrian_Tree([[0,1]]*d)
+        temp_tree.update_life_time(lbda, set_seed=100)
 
         labelled_indicies = range(n_labelled)
         labels = [1]*n_labelled
@@ -85,22 +92,30 @@ class test_Mondrian_Tree(unittest.TestCase):
             for j in range(d):
                 point.append(random.random())
             data.append(point)
-        temp.input_data(data, labelled_indicies, labels)
+        temp_tree.input_data(data, labelled_indicies, labels)
 
-        self.assertEqual(temp._num_points,100)
-        self.assertEqual(temp._num_labelled,20)
+        self.assertEqual(temp_tree._num_points,n_points)
+        self.assertEqual(temp_tree._num_labelled,n_labelled)
 
         if self.long_test:
-            temp.make_full_leaf_list()
-            for node in temp._full_leaf_list:
+            temp_tree.make_full_leaf_list()
+            for node in temp_tree._full_leaf_list:
                 print(len(node.labelled_index), len(node.unlabelled_index))
 
                 linear_dims = node.linear_dims
                 for ind in node.labelled_index:
-                    point = temp.points[ind]
+                    point = temp_tree.points[ind]
                     for dim in range(d):
-                        self.assertTrue(point[dim] > linear_dims[dim][0])
-                        self.assertTrue(point[dim] < linear_dims[dim][1])
+                        # print(linear_dims[dim][0], point[dim], linear_dims[dim][1])
+                        self.assertTrue(point[dim] >= linear_dims[dim][0])
+                        self.assertTrue(point[dim] <= linear_dims[dim][1])
+
+                for ind in node.unlabelled_index:
+                    point = temp_tree.points[ind]
+                    for dim in range(d):
+                        # print(linear_dims[dim][0], point[dim], linear_dims[dim][1])
+                        self.assertTrue(point[dim] >= linear_dims[dim][0])
+                        self.assertTrue(point[dim] <= linear_dims[dim][1])
 
     # Testing calculating leaf variances
 
@@ -156,7 +171,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     def test_update_life_time_tuned(self):
 
         self.mt1.update_life_time(self.a * self.n**(1/(2+self.d) - 1),set_seed=1)
-        self.assertEqual(self.mt1._num_leaves,1)
+        self.assertEqual(self.mt1._num_leaves,3)
 
 
 

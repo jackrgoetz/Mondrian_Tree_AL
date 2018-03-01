@@ -64,6 +64,45 @@ class test_LeafNode(unittest.TestCase):
         self.assertEqual(self.test_leaf_good.labelled_index,[1,2,3,4])
         self.assertEqual(self.test_leaf_good.unlabelled_index,[5,6,7,8,9,10])
 
+    # Used to detect tricky mutable default arguments error. DEFAULT TO NONE AND DEAL WITH 
+    # IT IN THE FUNCTION
+
+    # def test_spillover(self):
+    #     leaf_one = LeafNode()
+    #     leaf_three = LeafNode()
+    #     leaf_one.labelled_index = [1,2]
+    #     leaf_two = LeafNode()
+    #     print(leaf_one.labelled_index)
+    #     print(leaf_two.labelled_index)
+    #     print(leaf_three.labelled_index)
+
+    # def test_spillover_2(self):
+    #     leaf_one = LeafNode()
+    #     leaf_three = LeafNode()
+    #     leaf_one.extend_labelled_index([1,2])
+    #     leaf_two = LeafNode()
+    #     print(leaf_one.labelled_index)
+    #     print(leaf_two.labelled_index)
+    #     print(leaf_three.labelled_index)
+
+    # def test_spillover_3(self):
+    #     leaf_one = LeafNode()
+    #     leaf_three = LeafNode()
+    #     leaf_one.labelled_index.extend([1,2])
+    #     leaf_two = LeafNode()
+    #     print(leaf_one.labelled_index)
+    #     print(leaf_two.labelled_index)
+    #     print(leaf_three.labelled_index)
+
+    # def test_spillover_4(self):
+    #     leaf_one = LeafNode()
+    #     leaf_three = LeafNode()
+    #     leaf_one.labelled_index.append(3)
+    #     leaf_two = LeafNode()
+    #     print(leaf_one.labelled_index)
+    #     print(leaf_two.labelled_index)
+    #     print(leaf_three.labelled_index)
+
 
 
 

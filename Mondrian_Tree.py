@@ -98,7 +98,7 @@ class Mondrian_Tree:
                     print(
                         'Probability of going left is {}\n\
                         Probability of going right is {}\n\
-                        random value is {}').format(left_prob, right_prob, rand_split_val)
+                        Random value is {}').format(left_prob, right_prob, rand_split_val)
 
                 if rand_split_val < left_prob:
                     curr_node = curr_node.left_child
@@ -109,6 +109,9 @@ class Mondrian_Tree:
                     curr_node = curr_node.right_child
                     if self._verbose:
                         print('Going right')
+
+            # print(curr_node.leaf_id, curr_node.labelled_index, self._num_leaves)
+            # if self._root.is_leaf(): print(self._root.leaf_id, self._root.labelled_index, self._num_leaves)
 
             # Now that we're at the leaf we are going to split, we need to split this leaf
 
@@ -162,16 +165,18 @@ class Mondrian_Tree:
             new_split_node.percolate_subtree_linear_dim_change(subtree_lin_dim_change)
 
             # moving data points into the new leaves
-
             for ind in curr_node.labelled_index:
+                # print(curr_node.labelled_index)
                 new_split_node.leaf_for_point(self.points[ind]).extend_labelled_index(ind)
 
             for ind in curr_node.unlabelled_index:
                 new_split_node.leaf_for_point(self.points[ind]).extend_unlabelled_index(ind)
 
+            curr_node = None
+
             next_split_time = next_split_time + random.expovariate(self._root.subtree_linear_dim)
 
-    def input_data(self,all_data, labelled_indicies, labels):
+    def input_data(self, all_data, labelled_indicies, labels):
         '''Puts in data for Mondrian Tree. 
         all_data should be a list of lists (or numpy array, points by row) with all data points, 
         labelled_indicies should be a list of the indicies for data points which we have the

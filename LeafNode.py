@@ -16,11 +16,17 @@ class LeafNode:
 
     leaf_ids = 0
 
-    def __init__(self, labelled_index=[], unlabelled_index=[],linear_dims=[],
+    def __init__(self, labelled_index=None, unlabelled_index=None,linear_dims=None,
         parent_node=None, parent_branch=None):
         self.labelled_index = labelled_index
+        if self.labelled_index is None:
+            self.labelled_index = []
         self.unlabelled_index = unlabelled_index
+        if self.unlabelled_index is None:
+            self.unlabelled_index = []
         self.linear_dims = linear_dims
+        if self.linear_dims is None:
+            self.linear_dims = []
         self.parent_node = parent_node
         self.parent_branch = parent_branch
         self.subtree_linear_dim = self.calculate_subtree_linear_dim()
