@@ -30,7 +30,10 @@ class Mondrian_Tree:
         self._life_time = 0
         self._num_leaves = 1
 
-        self.full_leaf_list = []
+        self._full_leaf_list = []
+        self._full_leaf_mean_list = []
+        self._full_leaf_var_list = []
+        self._full_leaf_marginal_list = []
         self._full_leaf_list_up_to_date = False
 
         self._verbose = False # useful for debugging or seeing how things work
@@ -62,7 +65,7 @@ class Mondrian_Tree:
 
         # Indicating we are growing our tree so the full leaf list will be wrong
 
-        self.full_leaf_list = []
+        self._full_leaf_list = []
         self._full_leaf_list_up_to_date = False
 
         # We add new splits until the next split is after the new life time
@@ -167,6 +170,41 @@ class Mondrian_Tree:
 
             next_split_time = next_split_time + random.expovariate(self._root.subtree_linear_dim)
 
+    def input_data(all_data, labelled_indicies, labels):
+        '''Puts in data for Mondrian Tree. 
+        all_data should be a list of lists (or numpy array, points by row) with all data points, 
+        labelled_indicies should be a list of the indicies for data points which we have the
+        labels for, and labels should be an equal length list of those points labels.
+        '''
+
+        if len(all_data) < len(labelled_indicies):
+            raise ValueError('Cannot have more labelled indicies than points')
+
+        if len(labelled_indicies) != len(labels):
+            raise ValueError('Labelled indicies list and labels list must be same length')
+
+        self.points = all_data
+        self._num_points = len(self.points)
+        temp = [None] * self._num_points
+        for i,ind in enumerate(labelled_indicies):
+            temp[ind] = labels[i]
+        self.labels = temp
+        unlabelled_indicies = [x for x in range(self._num_points) if x not in labelled_indicies]
+
+        if self._root.is_leaf():
+            self._root.labelled_index = labelled_indicies
+            self._root.unlabelled_index = unlabelled_indicies
+
+        else:
+            for i in labelled_indicies:
+                curr_leaf = self._root.leaf_for_point(self.points[i])
+                curr_leaf.labelled_index.append(i)
+
+            for i in unlabelled_indicies:
+                curr_leaf = self._root.leaf_for_point(self.points[i])
+                curr_leaf.unlabelled_index.append(i)
+
+
     def make_full_leaf_list(self):
         '''Makes a list with pointers to every leaf in the tree. Likely to be expensive so 
         only do this if you're pre-building a tree for extensive use later. 
@@ -181,7 +219,24 @@ class Mondrian_Tree:
                 internal_dfs(node.right_child)
 
         internal_dfs(self._root)
-        self.full_leaf_list = full_leaf_list
+        self._full_leaf_list = full_leaf_list
+        for i, node in enumerate(self._full_leaf_list):
+            node.full_leaf_list_pos = i
         self._full_leaf_list_up_to_date = True
+
+    def make_full_leaf_var_list(self):
+        if not self._full_leaf_list_up_to_date:
+            print('Making full leaf list. Please wait')
+            self.make_full_leaf_list()
+            print('Done!')
+
+        for i, node in enumerate(self._full_leaf_list):
+            label_list = [self.labels[x] for x in node.labelled_index]
+            self._full_leaf_var_list[i] = utils.unbiased_var(label_list)
+
+
+
+
+
 
 

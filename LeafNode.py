@@ -28,6 +28,8 @@ class LeafNode:
         LeafNode.leaf_ids+= 1
         self.leaf_id = LeafNode.leaf_ids
 
+        self.full_leaf_list_pos = None
+
     def __str__(self):
         print_str = '\
         n_labelled = {}\n\
