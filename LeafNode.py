@@ -73,6 +73,17 @@ class LeafNode:
 
         return tot
 
+    def make_labelled(self, index):
+        '''Takes a point in the unlablled_index list and moves it to the labelled one.
+        If the point is not in the unlabelled_index list it returns an error.
+        '''
+
+        if index not in self.unlabelled_index:
+            raise ValueError('Point {} is not in this leaf'.format(index))
+
+        self.labelled_index.append(index)
+        self.unlabelled_index.remove(index)
+
     ###########################################
 
     # Basic methods
@@ -80,11 +91,11 @@ class LeafNode:
     def is_leaf(self):
         return True
 
-    def extend_labelled_index(self, new_labelled):
-        self.labelled_index.extend(new_labelled)
+    def extend_labelled_index(self, new_labelled_list):
+        self.labelled_index.extend(new_labelled_list)
 
-    def extend_unlabllerd_index(self, new_unlabelled):
-        self.unlabelled_index.extend(new_unlabelled)
+    def extend_unlabelled_index(self, new_unlabelled_list):
+        self.unlabelled_index.extend(new_unlabelled_list)
 
     def set_linear_dims(self, new_linear_dims):
         self.linear_dims = new_linear_dims

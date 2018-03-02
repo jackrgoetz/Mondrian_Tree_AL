@@ -64,6 +64,15 @@ class test_LeafNode(unittest.TestCase):
         self.assertEqual(self.test_leaf_good.labelled_index,[1,2,3,4])
         self.assertEqual(self.test_leaf_good.unlabelled_index,[5,6,7,8,9,10])
 
+    def test_make_labelled_not_in_unlabelled(self):
+        with self.assertRaises(ValueError):
+            self.test_leaf_empty.make_labelled(1)
+
+    def test_make_labelled_in_unlabelled(self):
+        self.test_leaf_good.make_labelled(5)
+        self.assertTrue(5 not in self.test_leaf_good.unlabelled_index)
+        self.assertTrue(5 in self.test_leaf_good.labelled_index)
+
     # Used to detect tricky mutable default arguments error. DEFAULT TO NONE AND DEAL WITH 
     # IT IN THE FUNCTION
 

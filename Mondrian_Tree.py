@@ -50,6 +50,10 @@ class Mondrian_Tree:
             self._num_dimensions, self._num_leaves,
             self._life_time, self._num_points)
 
+    ###########################################
+
+    # Tree building and updating methods
+
     def update_life_time(self, new_life_time, set_seed = None):
 
         '''Function for updating the tree with a new life time parameter, potentially 
@@ -167,10 +171,10 @@ class Mondrian_Tree:
             # moving data points into the new leaves
             for ind in curr_node.labelled_index:
                 # print(curr_node.labelled_index)
-                new_split_node.leaf_for_point(self.points[ind]).extend_labelled_index(ind)
+                new_split_node.leaf_for_point(self.points[ind]).extend_labelled_index([ind])
 
             for ind in curr_node.unlabelled_index:
-                new_split_node.leaf_for_point(self.points[ind]).extend_unlabelled_index(ind)
+                new_split_node.leaf_for_point(self.points[ind]).extend_unlabelled_index([ind])
 
             next_split_time = next_split_time + random.expovariate(self._root.subtree_linear_dim)
 
@@ -216,7 +220,7 @@ class Mondrian_Tree:
 
     ###########################################
 
-    # Basic methods
+    # Leaf list methods methods
 
     def make_full_leaf_list(self):
         '''Makes a list with pointers to every leaf in the tree. Likely to be expensive so 
