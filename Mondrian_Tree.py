@@ -46,18 +46,23 @@ class Mondrian_Tree:
         Number of leaf nodes = {}\n\
         Life time parameter = {}\n\
         \n\
-        Number of data points = {}'.format(
-            self._num_dimensions, self._num_leaves,
-            self._life_time, self._num_points)
+        Number of data points = {}\n\
+        Number of labels = {}'.format(
+            self._num_dimensions, self._num_leaves, self._life_time, self._num_points, 
+            self._num_labelled)
 
     ###########################################
 
-    # Tree building and updating methods
+    # Tree building and updating methods: Builds the tree based on the life time, and
+    # put data into the tree. The tree is build completely independently of any data,
+    # and can be built without having any data in it. The data can be added later 
+    # and it will be put into the correct leaves and everything. 
 
     def update_life_time(self, new_life_time, set_seed = None):
 
         '''Function for updating the tree with a new life time parameter, potentially 
-        growing the tree.
+        growing the tree. Grows until the next split would occur after the new life
+        time, moving any data within the tree into the new leaves.
         '''
 
         if new_life_time < self._life_time:
@@ -114,10 +119,9 @@ class Mondrian_Tree:
                     if self._verbose:
                         print('Going right')
 
-            # print(curr_node.leaf_id, curr_node.labelled_index, self._num_leaves)
-            # if self._root.is_leaf(): print(self._root.leaf_id, self._root.labelled_index, self._num_leaves)
-
-            # Now that we're at the leaf we are going to split, we need to split this leaf
+            # Now that we're at the leaf we are going to split, we need to split this leaf.
+            # We pick the dimension to split on proportional to it's length, and then pick
+            # a split point uniformly on that dimension
 
             dimension_probs = []
             for pair in curr_node.linear_dims:
@@ -169,6 +173,7 @@ class Mondrian_Tree:
             new_split_node.percolate_subtree_linear_dim_change(subtree_lin_dim_change)
 
             # moving data points into the new leaves
+
             for ind in curr_node.labelled_index:
                 # print(curr_node.labelled_index)
                 new_split_node.leaf_for_point(self.points[ind]).extend_labelled_index([ind])
@@ -199,11 +204,16 @@ class Mondrian_Tree:
         self.points = all_data
         self._num_points = len(self.points)
         self._num_labelled = len(labels)
+
+        # Making a label list, with None in places where we don't have the label
+
         temp = [None] * self._num_points
         for i,ind in enumerate(labelled_indicies):
             temp[ind] = labels[i]
         self.labels = temp
         unlabelled_indicies = [x for x in range(self._num_points) if x not in labelled_indicies]
+
+        # Placing each point into the correct leaf
 
         if self._root.is_leaf():
             self._root.labelled_index = labelled_indicies
@@ -220,7 +230,10 @@ class Mondrian_Tree:
 
     ###########################################
 
-    # Leaf list methods methods
+    # Leaf list building methods: We want the tree to have a list of nodes as well as
+    # various statistics about those nodes so we can easily access them. All the lists
+    # will be aligned, so the ith value in a list will correspond the the ith node in the
+    # node list. 
 
     def make_full_leaf_list(self):
         '''Makes a list with pointers to every leaf in the tree. Likely to be expensive so 
@@ -237,6 +250,9 @@ class Mondrian_Tree:
 
         internal_dfs(self._root)
         self._full_leaf_list = full_leaf_list
+
+        # Ensure each leaf knows where it is in the list
+
         for i, node in enumerate(self._full_leaf_list):
             node.full_leaf_list_pos = i
         self._full_leaf_list_up_to_date = True
@@ -290,6 +306,10 @@ class Mondrian_Tree:
         self.make_full_leaf_mean_list()
         self.make_full_leaf_var_list()
         self.make_full_leaf_marginal_list()
+
+    ###########################################
+
+    # Active Learning methods: 
 
 
 

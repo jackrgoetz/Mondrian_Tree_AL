@@ -47,8 +47,10 @@ class LeafNode:
         return(print_str)
     
     def pick_new_points(self, num_samples, self_update = True, set_seed = None):
-        # Returns the index of points to get labels for, and automatically adds
-        # them the leafs labelled points by default
+        '''Returns the index of points to get labels for, and automatically adds
+        them the leafs labelled points by default
+        '''
+
         if num_samples > len(self.unlabelled_index):
             raise ValueError('This leaf only has {} < {} unlabelled points'.format(
                 len(self.unlabelled_index), num_samples))
@@ -64,8 +66,9 @@ class LeafNode:
         return new_points
 
     def calculate_subtree_linear_dim(self):
-        # Since this 'subtree' is only the leaf, it's linear dim is just the
-        # sum of its linear dims
+        '''Since this 'subtree' is only the leaf, it's linear dim is just the
+        sum of its linear dims.
+        '''
 
         tot = 0
         for pair in self.linear_dims:
