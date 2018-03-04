@@ -1,6 +1,8 @@
 import unittest
 import math
 import random
+import warnings
+
 from Mondrian_Tree import Mondrian_Tree
 from LeafNode import LeafNode
 
@@ -14,8 +16,6 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.a = 1
         self.linear_dims = [[0,1]]*self.d
         self.mt1 = Mondrian_Tree(self.linear_dims)
-
-        self.long_test = False
 
     # Basic tests
 
@@ -125,7 +125,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         n_labelled = 20
         temp_tree = Mondrian_Tree([[0,1]]*d)
         temp_tree.update_life_time(lbda, set_seed=100)
-        print(temp_tree._num_points)
+        # print(temp_tree._num_points)
 
         labelled_indicies = range(n_labelled)
         labels = [1]*n_labelled
@@ -138,7 +138,7 @@ class test_Mondrian_Tree(unittest.TestCase):
             data.append(point)
         temp_tree.input_data(data, labelled_indicies, labels)
         temp_tree.update_life_time(lbda2, set_seed=100)
-        print(temp_tree._num_points)
+        # print(temp_tree._num_points)
 
         temp_tree.make_full_leaf_list()
         for node in temp_tree._full_leaf_list:
@@ -257,7 +257,85 @@ class test_Mondrian_Tree(unittest.TestCase):
             # print(node_labels)
             temp_marginal = len(node_points)/temp_tree._num_points
             self.assertTrue(abs(temp_tree._full_leaf_marginal_list[i] - temp_marginal) < 1e-9)
-            
+
+    # Testing using predictions
+
+    def test_predict_bad_input(self):
+        with self.assertRaises(TypeError):
+            self.mt1.predict(1)
+
+    def test_predict_bad_length(self):
+        with self.assertRaises(ValueError):
+            self.mt1.predict([])
+
+    def test_predict_empty(self):
+        with self.assertWarns(UserWarning):
+            self.mt1.predict([0.5]*self.d)
+
+    def test_predict_no_leaf_list(self):
+        d = 3
+        lbda = 0.5
+        n_points = 100
+        n_labelled = 20
+        seed = 1
+        temp_tree = Mondrian_Tree([[0,1]]*d)
+        temp_tree.update_life_time(lbda, set_seed=100)
+
+        labelled_indicies = range(n_labelled)
+        labels = [random.random() for i in range(n_labelled)]
+        data = []
+        random.seed(seed)
+        for i in range(n_points):
+            point = []
+            for j in range(d):
+                point.append(random.random())
+            data.append(point)
+        temp_tree.input_data(data, labelled_indicies, labels)
+
+        new_point = []
+        for j in range(d):
+            new_point.append(random.random())
+        random.seed(seed)
+        pred = temp_tree.predict(new_point)
+        print(pred)
+
+        node = temp_tree._root.leaf_for_point(new_point)
+        vals = [labels[x] for x in node.labelled_index]
+        print(len(vals))
+        self.assertEqual(pred, sum(vals)/len(vals))
+
+    def test_predict_leaf_list(self):
+        d = 3
+        lbda = 0.5
+        n_points = 100
+        n_labelled = 20
+        seed = 1
+        temp_tree = Mondrian_Tree([[0,1]]*d)
+        temp_tree.update_life_time(lbda, set_seed=100)
+        temp_tree.make_full_leaf_list()
+
+        labelled_indicies = range(n_labelled)
+        labels = [random.random() for i in range(n_labelled)]
+        data = []
+        random.seed(seed)
+        for i in range(n_points):
+            point = []
+            for j in range(d):
+                point.append(random.random())
+            data.append(point)
+        temp_tree.input_data(data, labelled_indicies, labels)
+
+        new_point = []
+        for j in range(d):
+            new_point.append(random.random())
+        random.seed(seed)
+        pred = temp_tree.predict(new_point)
+        print(pred)
+
+        node = temp_tree._root.leaf_for_point(new_point)
+        vals = [labels[x] for x in node.labelled_index]
+        print(len(vals))
+        self.assertEqual(pred, sum(vals)/len(vals))
 
     # Testing theoretical bounds
 

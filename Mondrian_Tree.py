@@ -1,6 +1,7 @@
 import random
 import copy
 import utils
+import warnings
 
 from LeafNode import LeafNode
 from SplitNode import SplitNode
@@ -36,20 +37,23 @@ class Mondrian_Tree:
         self._full_leaf_var_list = []
         self._full_leaf_marginal_list = []
         self._full_leaf_list_up_to_date = False
+        self._full_leaf_mean_list_up_to_date = False
+        self._full_leaf_var_list_up_to_date = False
+        self._full_leaf_marginal_list_up_to_date = False
 
         self._verbose = False # useful for debugging or seeing how things work
 
     def __str__(self):
         # Add more as needed
-        return '\
-        Number of dimensions = {}\n \
-        Number of leaf nodes = {}\n\
-        Life time parameter = {}\n\
-        \n\
-        Number of data points = {}\n\
-        Number of labels = {}'.format(
+        return (
+        'Number of dimensions = {}\n' 
+        'Number of leaf nodes = {}\n'
+        'Life time parameter = {}\n'
+        '\n'
+        'Number of data points = {}\n'
+        'Number of labels = {}'.format(
             self._num_dimensions, self._num_leaves, self._life_time, self._num_points, 
-            self._num_labelled)
+            self._num_labelled))
 
     ###########################################
 
@@ -77,6 +81,9 @@ class Mondrian_Tree:
 
         self._full_leaf_list = []
         self._full_leaf_list_up_to_date = False
+        self._full_leaf_mean_list_up_to_date = False
+        self._full_leaf_var_list_up_to_date = False
+        self._full_leaf_marginal_list_up_to_date = False
 
         # We add new splits until the next split is after the new life time
 
@@ -272,6 +279,7 @@ class Mondrian_Tree:
                 mean_list.append(0)
 
         self._full_leaf_mean_list = mean_list
+        self._full_leaf_mean_list_up_to_date = True
 
     def make_full_leaf_var_list(self):
         if not self._full_leaf_list_up_to_date:
@@ -285,6 +293,7 @@ class Mondrian_Tree:
             var_list.append(utils.unbiased_var(label_list))
 
         self._full_leaf_var_list = var_list
+        self._full_leaf_var_list_up_to_date = True
 
     def make_full_leaf_marginal_list(self):
         if not self._full_leaf_list_up_to_date:
@@ -300,12 +309,51 @@ class Mondrian_Tree:
             marginal_list.append(len(points_list)/self._num_points)
 
         self._full_leaf_marginal_list = marginal_list
+        self._full_leaf_marginal_list_up_to_date = True
 
     def update_leaf_lists(self):
         self.make_full_leaf_list()
         self.make_full_leaf_mean_list()
         self.make_full_leaf_var_list()
         self.make_full_leaf_marginal_list()
+
+    ###########################################
+
+    # Mondrian Tree prediction methods. These methods actually use our Mondrian tree to
+    # make predictions and such. 
+
+    def predict(self, new_point):
+
+        '''Make prediction for a data point using the mean of that leaf'''
+
+        try:
+            len(new_point)
+        except TypeError:
+            raise TypeError(
+                'Given point has no len(), so probably is not a vector representing a data point. '
+                'Try turning it into a list, tuple or numpy array where each entry is a dimension')
+
+        if len(new_point) != self._num_dimensions:
+            raise ValueError(
+                'Data point is not of the correct length. Must be the same dimension as the '
+                'dimensions used to build the Mondrian Tree when it was initialized.')
+
+        correct_leaf = self._root.leaf_for_point(new_point)
+        if len(correct_leaf.labelled_index) == 0:
+            warnings.warn(
+                'WARNING: No labelled data in this leaf. The value of 0 is returned by default but '
+                'really should not be considered an actual prediction that depends at all on the data. '
+                'Possible solutions to this are to sample data within that leaf, build smaller trees, '
+                'or use the global data average as your prediction. But whatever solution you use dependent '
+                'on what you are doing. You should be able to catch this warning and handle it automatically '
+                'using the warning module with a try/except statement.')
+            return 0 
+        if self._full_leaf_mean_list_up_to_date:
+            return self._full_leaf_mean_list[correct_leaf.full_leaf_list_pos]
+
+        else:
+            temp_lis = [self.labels[x] for x in correct_leaf.labelled_index]
+            return sum(temp_lis)/len(temp_lis)
 
     ###########################################
 

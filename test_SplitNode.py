@@ -1,4 +1,5 @@
 import unittest
+import copy
 from LeafNode import LeafNode
 from SplitNode import SplitNode
 
@@ -74,6 +75,18 @@ class test_SplitNode(unittest.TestCase):
         self.A.calculate_subtree_linear_dim()
         self.D.percolate_subtree_linear_dim_change(0.5)
         self.assertEqual(self.A.subtree_linear_dim,4.8)
+
+    def test_percolate_subtree_linear_dim__2(self):
+        self.A.calculate_subtree_linear_dim()
+        # This won't actually partition the space but is just a test of percolate
+        temp_lin_dim = self.F.subtree_linear_dim
+        self.F.set_linear_dims([[0,1],[0,1]])
+        self.D.percolate_subtree_linear_dim_change(2 - temp_lin_dim)
+        perc_lin_dim = copy.copy(self.A.subtree_linear_dim)
+        # print(perc_lin_dim)
+        self.A.calculate_subtree_linear_dim()
+        # print(self.A.subtree_linear_dim)
+        self.assertEqual(self.A.subtree_linear_dim, perc_lin_dim)
 
 if __name__ == '__main__':
     unittest.main()
