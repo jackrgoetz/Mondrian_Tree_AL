@@ -2,6 +2,7 @@ import random
 import copy
 import utils
 import warnings
+import math
 
 from LeafNode import LeafNode
 from SplitNode import SplitNode
@@ -40,6 +41,12 @@ class Mondrian_Tree:
         self._full_leaf_mean_list_up_to_date = False
         self._full_leaf_var_list_up_to_date = False
         self._full_leaf_marginal_list_up_to_date = False
+
+        self.prediction_default_value = 0
+
+        self._al_proportions = []
+        self._al_proportions_up_to_date = False
+        self.al_default_var = 0
 
         self._verbose = False # useful for debugging or seeing how things work
 
@@ -84,6 +91,7 @@ class Mondrian_Tree:
         self._full_leaf_mean_list_up_to_date = False
         self._full_leaf_var_list_up_to_date = False
         self._full_leaf_marginal_list_up_to_date = False
+        self._active_learning_proportions_up_to_date = False
 
         # We add new splits until the next split is after the new life time
 
@@ -331,7 +339,7 @@ class Mondrian_Tree:
         except TypeError:
             raise TypeError(
                 'Given point has no len(), so probably is not a vector representing a data point. '
-                'Try turning it into a list, tuple or numpy array where each entry is a dimension')
+                'Try turning it into a list, tuple or numpy array where each entry is a dimension.')
 
         if len(new_point) != self._num_dimensions:
             raise ValueError(
@@ -341,14 +349,15 @@ class Mondrian_Tree:
         correct_leaf = self._root.leaf_for_point(new_point)
         if len(correct_leaf.labelled_index) == 0:
             warnings.warn(
-                'WARNING: No labelled data in this leaf. The value of 0 is returned by default but '
-                'really should not be considered an actual prediction that depends at all on the data. '
+                'WARNING: No labelled data in this leaf. The value of {} is returned by default but '
+                'really should not be considered an actual prediction unless you set it with data using. '
+                'the .prediction_default_value instance variable.'
                 'Possible solutions to this are to sample data within that leaf, build smaller trees, '
                 'or use the global data average as your prediction. But whatever solution you use dependent '
                 'on what you are doing. You should be able to catch this warning and handle it automatically '
-                'using the warning module with a try/except statement.')
-            return 0 
-        if self._full_leaf_mean_list_up_to_date:
+                'using the warning module with a try/except statement.'.format(self.prediction_default_value))
+            return self.prediction_default_value 
+        elif self._full_leaf_mean_list_up_to_date:
             return self._full_leaf_mean_list[correct_leaf.full_leaf_list_pos]
 
         else:
@@ -369,7 +378,7 @@ class Mondrian_Tree:
         except TypeError:
             raise TypeError(
                 'Given point has no len(), so probably is not a vector representing a data point. '
-                'Try turning it into a list, tuple or numpy array where each entry is a dimension')
+                'Try turning it into a list, tuple or numpy array where each entry is a dimension.')
 
         if len(new_point) != self._num_dimensions:
             raise ValueError(
@@ -387,10 +396,76 @@ class Mondrian_Tree:
                 'return labelled index list.')
             return correct_leaf.labelled_index
 
+    def set_default_pred_global_mean(self):
+        '''Calculates the global mean for all labelled points and sets the default prediction
+        to that.
+        '''
+
+        if self.labels is None:
+            self.prediction_default_value = 0
+        else:
+            have_labels = [x for x in self.labels if x is not None]
+            if len(have_labels) != 0:
+                self.prediction_default_value = sum(have_labels) / len(have_labels)
+            else:
+                self.prediction_default_value = 0
 
     ###########################################
 
-    # Active Learning methods: 
+    # Active Learning methods: methods for doing active learning as described in <paper>. all
+    # methods here will start with al_ so you know they're active learning related.
+
+    def al_set_default_var_global_var(self):
+        '''Calculates the global variance for all labelled points and sets the default variance
+        to that.
+        '''
+        if self.labels is None:
+            self.al_default_var = 0
+        else:
+            have_labels = [x for x in self.labels if x is not None]
+            if len(have_labels) != 0:
+                self.al_default_var = utils.unbiased_var(have_labels)
+            else:
+                self.al_default_var = 0
+
+    def al_calculate_leaf_proportions(self):
+        '''Calculates estimates of the leaf proportions, using estimates for leaf variances and
+        marginal probabilities, as described in <paper>
+        '''
+
+        if not self._full_leaf_list_up_to_date:
+            self.update_leaf_lists()
+
+        al_var_list = copy.copy(self._full_leaf_var_list)
+        for i, val in enumerate(al_var_list):
+            if val == 0:
+                al_var_list[i] = self.al_default_var
+
+        al_proportions = []
+
+        if self._num_points == 0:
+            warnings.warn('WARNING: No data points in tree. Returning uniform over all leaves')
+            self._al_proportions = [1/self._num_leaves]*self._num_leaves
+            self._al_proportions_up_to_date = True
+
+        elif sum(al_var_list) == 0:
+            warnings.warn('WARNING: No non-zero variance. Returning uniform over all leaves')
+            self._al_proportions = [1/self._num_leaves]*self._num_leaves
+            self._al_proportions_up_to_date = True
+
+        else:
+            for i, node in enumerate(self._full_leaf_list):
+                al_proportions.append(math.sqrt(
+                    self._full_leaf_marginal_list[i] * al_var_list[i]))
+
+            normalizer = sum(al_proportions)
+            al_proportions = [x/normalizer for x in al_proportions]
+            self._al_proportions = al_proportions
+            self._al_proportions_up_to_date = True
+
+
+
+
 
 
 
