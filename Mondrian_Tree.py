@@ -319,7 +319,7 @@ class Mondrian_Tree:
 
     ###########################################
 
-    # Mondrian Tree prediction methods. These methods actually use our Mondrian tree to
+    # Mondrian Tree interaction methods. These methods actually use our Mondrian tree to
     # make predictions and such. 
 
     def predict(self, new_point):
@@ -354,6 +354,39 @@ class Mondrian_Tree:
         else:
             temp_lis = [self.labels[x] for x in correct_leaf.labelled_index]
             return sum(temp_lis)/len(temp_lis)
+
+    def get_points_in_same_leaf(self, new_point, which_index_list = 'labelled'):
+        '''Gets the labelled and unlabelled point index lists for a given data point. If you want
+        to predict something other than the mean (say the median), or say sample from the tree's
+        predicted conditional distribution, you can use this to help implement whatever you want.
+
+        Returns the labelled or unlabelled index lists. Labelled is the default. Pick using 
+        'labelled' or 'unlabelled'
+        '''
+
+        try:
+            len(new_point)
+        except TypeError:
+            raise TypeError(
+                'Given point has no len(), so probably is not a vector representing a data point. '
+                'Try turning it into a list, tuple or numpy array where each entry is a dimension')
+
+        if len(new_point) != self._num_dimensions:
+            raise ValueError(
+                'Data point is not of the correct length. Must be the same dimension as the '
+                'dimensions used to build the Mondrian Tree when it was initialized.')
+
+        correct_leaf = self._root.leaf_for_point(new_point)
+        if which_index_list == 'labelled':
+            return correct_leaf.labelled_index
+        elif which_index_list == 'unlabelled':
+            return correct_leaf.unlabelled_index
+        else:
+            warnings.warn(
+                'WARNING: which_index_list was not \'labelled\' or \'unlabelled\'. Defaulting to '
+                'return labelled index list.')
+            return correct_leaf.labelled_index
+
 
     ###########################################
 
