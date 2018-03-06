@@ -10,6 +10,8 @@ from LeafNode import LeafNode
 
 class test_Mondrian_Tree(unittest.TestCase):
 
+    # TODO: Run tests with inputing data with numpy arrays
+
     def setUp(self):
 
         self.d = 3
@@ -19,6 +21,7 @@ class test_Mondrian_Tree(unittest.TestCase):
 
         self.n_points = 100
         self.n_labelled = 20
+        random.seed(123)
         self.labels = [random.random() for i in range(self.n_labelled)]
         self.labelled_indicies = range(self.n_labelled)
         self.data = []
@@ -139,7 +142,7 @@ class test_Mondrian_Tree(unittest.TestCase):
 
     # Testing make leaf list 
 
-    def test_make_full_leaf_list_base(self):
+    def test_make_full_leaf_list_root(self):
         self.mt1.make_full_leaf_list()
         self.assertEqual(len(self.mt1._full_leaf_list),1)
 
@@ -153,6 +156,17 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.assertEqual(len(self.mt1._full_leaf_list),self.mt1._num_leaves)
 
     # Testing calculating leaf variances
+
+    def test_make_full_leaf_var_list_root(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.make_full_leaf_list()
+        self.mt1.make_full_leaf_var_list()
+        self.assertEqual(utils.unbiased_var(self.labels), self.mt1._full_leaf_var_list[0])
+
+    def test_make_full_leaf_var_list_empty(self):
+        self.mt1.make_full_leaf_list()
+        self.mt1.make_full_leaf_var_list()
+        self.assertEqual(0, self.mt1._full_leaf_var_list[0])
 
     def test_make_full_leaf_var_list(self):
         lbda = 0.5
@@ -175,7 +189,18 @@ class test_Mondrian_Tree(unittest.TestCase):
 
     # Testing calculating leaf mean
 
-    def test_make_full_mean_list(self):
+    def test_make_full_leaf_mean_list_root(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.make_full_leaf_list()
+        self.mt1.make_full_leaf_mean_list()
+        self.assertEqual(sum(self.labels)/self.n_labelled, self.mt1._full_leaf_mean_list[0])
+
+    def test_make_full_leaf_mean_list_empty(self):
+        self.mt1.make_full_leaf_list()
+        self.mt1.make_full_leaf_mean_list()
+        self.assertEqual(0, self.mt1._full_leaf_mean_list[0])
+
+    def test_make_full_leaf_mean_list(self):
         lbda = 0.5
         self.mt1.update_life_time(lbda, set_seed=100)
 
@@ -195,7 +220,18 @@ class test_Mondrian_Tree(unittest.TestCase):
 
     # Testing calculating leaf marginal probabilities
 
-    def test_make_full_marginal_list(self):
+    def test_make_full_leaf_marginal_list_root(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.make_full_leaf_list()
+        self.mt1.make_full_leaf_marginal_list()
+        self.assertEqual(1, self.mt1._full_leaf_marginal_list[0])
+
+    def test_make_full_leaf_marginal_list_empty(self):
+        self.mt1.make_full_leaf_list()
+        self.mt1.make_full_leaf_marginal_list()
+        self.assertEqual(0, self.mt1._full_leaf_marginal_list[0])
+
+    def test_make_full_leaf_marginal_list(self):
         lbda = 0.5
         self.mt1.update_life_time(lbda, set_seed=100)
 
@@ -369,7 +405,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     def test_set_default_pred_global_mean_empty(self):
         lbda = 0.5
         seed = 1
-        self.mt1.update_life_time(lbda, set_seed=100)
+        self.mt1.update_life_time(lbda, set_seed=seed)
         self.mt1.make_full_leaf_list()
         self.mt1.prediction_default_value = 1
         self.mt1.set_default_pred_global_mean()
@@ -378,7 +414,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     def test_set_default_pred_global_mean(self):
         lbda = 0.5
         seed = 1
-        self.mt1.update_life_time(lbda, set_seed=100)
+        self.mt1.update_life_time(lbda, set_seed=seed)
         self.mt1.make_full_leaf_list()
         self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
         self.mt1.set_default_pred_global_mean()
@@ -387,7 +423,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     def test_al_set_default_var_global_var_empty(self):
         lbda = 0.5
         seed = 1
-        self.mt1.update_life_time(lbda, set_seed=100)
+        self.mt1.update_life_time(lbda, set_seed=seed)
         self.mt1.make_full_leaf_list()
         self.mt1.al_default_var = 1
         self.mt1.al_set_default_var_global_var()
@@ -396,7 +432,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     def test_al_set_default_var_global_var(self):
         lbda = 0.5
         seed = 1
-        self.mt1.update_life_time(lbda, set_seed=100)
+        self.mt1.update_life_time(lbda, set_seed=seed)
         self.mt1.make_full_leaf_list()
         self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
         self.mt1.al_set_default_var_global_var()
@@ -407,8 +443,52 @@ class test_Mondrian_Tree(unittest.TestCase):
 
     # Testing active learning parts
 
+    def test_al_calculate_leaf_proportions_empty_root(self):
+        with self.assertWarns(UserWarning):
+            self.mt1.al_calculate_leaf_proportions()
+        self.assertEqual(self.mt1._al_proportions, [1])
+
     def test_al_calculate_leaf_proportions_empty(self):
-        self.assertTrue(False, 'No test written yet')
+        lbda = 0.5
+        seed = 1
+        self.mt1.update_life_time(lbda, set_seed=seed)
+        with self.assertWarns(UserWarning):
+            self.mt1.al_calculate_leaf_proportions()
+        self.assertEqual(self.mt1._al_proportions, [1/self.mt1._num_leaves]*self.mt1._num_leaves)
+
+    def test_al_calculate_leaf_proportions_root(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        self.assertEqual(self.mt1._al_proportions, [1])
+
+    def test_al_calculate_leaf_proportions(self):
+        lbda = 0.5
+        seed = 1
+        self.mt1.update_life_time(lbda, set_seed=seed)
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        temp_prop_list = []
+        for i, node in enumerate(self.mt1._full_leaf_list):
+            node_points = [x for x in node.labelled_index] + [x for x in node.unlabelled_index]
+            # print(len(node_points))
+            # print(self.mt1._full_leaf_marginal_list[i])
+            if len(node_points) != 0:
+                temp_var = utils.unbiased_var([self.labels[x] for x in node.labelled_index])
+                # print(self.mt1._al_proportions[i])
+                # print(math.sqrt(temp_var * (len(node_labels)/self.n_points)))
+                temp_prop_list.append(math.sqrt(temp_var * (len(node_points)/self.n_points)))
+                
+            else:
+                self.assertEqual(self.mt1._al_proportions[i],0)
+
+        normalizer = sum(temp_prop_list)
+        temp_prop_list = [x/normalizer for x in temp_prop_list]
+        # print(temp_prop_list)
+        for i, val in enumerate(temp_prop_list):
+            # print(val, self.mt1._al_proportions[i])
+            self.assertTrue(abs(self.mt1._al_proportions[i] - val) < 1e-9)
+
+
 
 
 

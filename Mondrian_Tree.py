@@ -203,6 +203,9 @@ class Mondrian_Tree:
         all_data should be a list of lists (or numpy array, points by row) with all data points, 
         labelled_indicies should be a list of the indicies for data points which we have the
         labels for, and labels should be an equal length list of those points labels.
+
+        Should work with inputting things as numpy arrays, but this is the only place you can 
+        safely use numpy arrays. 
         '''
 
         if len(all_data) < len(labelled_indicies):
@@ -231,7 +234,7 @@ class Mondrian_Tree:
         # Placing each point into the correct leaf
 
         if self._root.is_leaf():
-            self._root.labelled_index = labelled_indicies
+            self._root.labelled_index = list(labelled_indicies)
             self._root.unlabelled_index = unlabelled_indicies
 
         else:
@@ -309,15 +312,20 @@ class Mondrian_Tree:
             self.make_full_leaf_list()
             print('Done!')
 
-        marginal_list = []
-        for i, node in enumerate(self._full_leaf_list):
-            points_list = (
-                [self.points[x] for x in node.unlabelled_index]+
-                [self.points[x] for x in node.labelled_index])
-            marginal_list.append(len(points_list)/self._num_points)
+        if self._num_points == 0:
+            self._full_leaf_marginal_list = [0]*self._num_leaves
 
-        self._full_leaf_marginal_list = marginal_list
-        self._full_leaf_marginal_list_up_to_date = True
+        else:
+
+            marginal_list = []
+            for i, node in enumerate(self._full_leaf_list):
+                points_list = (
+                    [self.points[x] for x in node.unlabelled_index]+
+                    [self.points[x] for x in node.labelled_index])
+                marginal_list.append(len(points_list)/self._num_points)
+
+            self._full_leaf_marginal_list = marginal_list
+            self._full_leaf_marginal_list_up_to_date = True
 
     def update_leaf_lists(self):
         self.make_full_leaf_list()
@@ -434,7 +442,11 @@ class Mondrian_Tree:
         '''
 
         if not self._full_leaf_list_up_to_date:
-            self.update_leaf_lists()
+            self.make_full_leaf_list()
+        if not self._full_leaf_var_list_up_to_date:
+            self.make_full_leaf_var_list()
+        if not self._full_leaf_marginal_list_up_to_date:
+            self.make_full_leaf_marginal_list()
 
         al_var_list = copy.copy(self._full_leaf_var_list)
         for i, val in enumerate(al_var_list):
