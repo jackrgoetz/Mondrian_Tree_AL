@@ -32,7 +32,9 @@ class test_Mondrian_Tree(unittest.TestCase):
                 point.append(random.random())
             self.data.append(point)
 
-    # Basic tests
+    ###########################################
+
+    # Basic life time updating tests
 
     def test_update_first_life_time_0p1(self):
         temp = Mondrian_Tree([[0,1]]*5)
@@ -53,8 +55,6 @@ class test_Mondrian_Tree(unittest.TestCase):
 
         self.mt1.update_life_time(self.a * self.n_labelled**(1/(2+self.d) - 1),set_seed=1)
         self.assertEqual(self.mt1._num_leaves,2)
-
-    ###########################################
 
     # Testing input data
 
@@ -137,6 +137,31 @@ class test_Mondrian_Tree(unittest.TestCase):
                     # print(linear_dims[dim][0], point[dim], linear_dims[dim][1])
                     self.assertTrue(point[dim] >= linear_dims[dim][0])
                     self.assertTrue(point[dim] <= linear_dims[dim][1])
+
+    def test_label_point_root(self):
+        val = 1
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.label_point(self.n_labelled, val)
+        self.assertEqual(self.mt1.labels[self.n_labelled],val)
+        self.assertEqual(self.mt1._num_labelled, self.n_labelled + 1)
+        leaf = self.mt1._root.leaf_for_point(self.data[self.n_labelled])
+        self.assertTrue(self.n_labelled in leaf.labelled_index)
+
+    def test_label_point_empty(self):
+        self.assertTrue(False, 'Next test to write')
+
+    def test_label_point(self):
+        val = 1
+        lbda = 0.5
+        seed = 1
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.update_life_time(lbda, set_seed=seed)
+        self.mt1.label_point(self.n_labelled, val)
+        self.assertEqual(self.mt1.labels[self.n_labelled],val)
+        self.assertEqual(self.mt1._num_labelled, self.n_labelled + 1)
+        leaf = self.mt1._root.leaf_for_point(self.data[self.n_labelled])
+        # print(leaf.labelled_index)
+        self.assertTrue(self.n_labelled in leaf.labelled_index)
 
     ###########################################
 

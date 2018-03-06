@@ -246,6 +246,21 @@ class Mondrian_Tree:
                 curr_leaf = self._root.leaf_for_point(self.points[i])
                 curr_leaf.unlabelled_index.append(i)
 
+    def label_point(self, index, value):
+        '''Adds a label to a specific data point. Throws an error if that point
+        is already labelled. 
+        '''
+
+        if len(self.labels) <= index:
+            raise ValueError('Index {} larger than size of data in tree'.format(index))
+
+        self.labels[index] = value
+        leaf = self._root.leaf_for_point(self.points[index])
+        leaf.make_labelled(index)
+        self._num_labelled += 1
+        self._full_leaf_mean_list_up_to_date = False
+        self._full_leaf_var_list_up_to_date = False
+
     ###########################################
 
     # Leaf list building methods: We want the tree to have a list of nodes as well as
