@@ -550,7 +550,8 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.mt1.update_life_time(lbda, set_seed=seed)
         self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
         self.mt1.al_calculate_leaf_proportions()
-        self.mt1.al_calculate_leaf_number_new_labels(21)
+        with self.assertWarns(UserWarning):
+            self.mt1.al_calculate_leaf_number_new_labels(21)
         # print(self.mt1._al_leaf_number_new_labels)
         self.assertEqual(sum(self.mt1._al_leaf_number_new_labels),1)
         
@@ -561,7 +562,7 @@ class test_Mondrian_Tree(unittest.TestCase):
 
     def test_al_calculate_leaf_number_new_labels_many(self):
         lbda = 0.5
-        seed = 10
+        seed = 1
         self.mt1.update_life_time(lbda, set_seed=seed)
         self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
         self.mt1.al_calculate_leaf_proportions()
@@ -573,6 +574,9 @@ class test_Mondrian_Tree(unittest.TestCase):
             curr_num = len(node.labelled_index)
             tot_num = curr_num + self.mt1._al_leaf_number_new_labels[i]
             print(self.mt1._al_leaf_number_new_labels[i],tot_num, self.mt1._al_proportions[i])
+
+    def test_al_calculate_leaf_number_new_labels_incomplete(self):
+        self.assertTrue(False, 'Do more testing for this function. Both auto and visual.')
 
     def test_al_calculate_point_probabilities_proportions_empty(self):
         with self.assertWarns(UserWarning):

@@ -543,6 +543,11 @@ class Mondrian_Tree:
             num_per_leaf_fractions)]
 
         remaining_budget = num_samples_left - sum(num_per_leaf)
+        if abs(remaining_budget/num_samples_left) > 0.1:
+            warnings.warn('remaining_budget is = {} fraction of number of new samples. '
+            'It may not be possible to get close to the optimal solution given the current locations '
+            'of labelled data.'.format(abs(remaining_budget/num_samples_left))
+            )
 
         # print(remaining_budget)
 
@@ -577,7 +582,7 @@ class Mondrian_Tree:
 
         # If we have too many points, we subtract from the leaves with the most total points
 
-        total_num_per_leaf = [math.floor(x) for x in self._al_proportions]
+        total_num_per_leaf = [math.floor(x*num_samples_total) for x in self._al_proportions]
         while remaining_budget < 0:
 
             for i, val in enumerate(num_per_leaf):
@@ -585,7 +590,7 @@ class Mondrian_Tree:
                     total_num_per_leaf[i] = float('-inf')
 
             num_per_leaf[total_num_per_leaf.index(max(total_num_per_leaf))] -= 1
-            # total_num_per_leaf[total_num_per_leaf.index(max(total_num_per_leaf))] = float('-inf')
+            total_num_per_leaf[total_num_per_leaf.index(max(total_num_per_leaf))] -=1
             remaining_budget += 1
 
         self._al_leaf_number_new_labels = num_per_leaf
