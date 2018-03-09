@@ -48,6 +48,9 @@ class test_utils(unittest.TestCase):
     def test_unbaised_var_empty(self):
         self.assertEqual(utils.unbiased_var([]),0)
 
+    def test_unbiased_var_single(self):
+        self.assertEqual(utils.unbiased_var([1]),0)
+
     def test_unbiased_var_all_equal(self):
         self.assertEqual(utils.unbiased_var([1,1,1,1]),0)
 

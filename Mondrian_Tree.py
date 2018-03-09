@@ -47,6 +47,9 @@ class Mondrian_Tree:
         self._al_proportions = []
         self._al_proportions_up_to_date = False
         self.al_default_var = 0
+        self._al_point_weights_proportional = None
+        self._al_point_weights_adjustment = None
+        self._al_leaf_number_new_labels = None
 
         self._verbose = False # useful for debugging or seeing how things work
 
@@ -250,6 +253,9 @@ class Mondrian_Tree:
         '''Adds a label to a specific data point. Throws an error if that point
         is already labelled. 
         '''
+
+        if self.labels is None:
+            raise ValueError('No data in the tree')
 
         if len(self.labels) <= index:
             raise ValueError('Index {} larger than size of data in tree'.format(index))
@@ -456,6 +462,8 @@ class Mondrian_Tree:
         marginal probabilities, as described in <paper>
         '''
 
+        # Ensure all the lists we need are built
+
         if not self._full_leaf_list_up_to_date:
             self.make_full_leaf_list()
         if not self._full_leaf_var_list_up_to_date:
@@ -489,6 +497,150 @@ class Mondrian_Tree:
             al_proportions = [x/normalizer for x in al_proportions]
             self._al_proportions = al_proportions
             self._al_proportions_up_to_date = True
+
+    def al_calculate_leaf_number_new_labels(self, num_samples_total, round_by = 'smallest'):
+        '''Calculate how many new labelled points each leaf should get to get as close as 
+        possible to the proportions in _al_proportions. Since these proportions might not
+        be possible with integer number of points, we have two heuristic ways of making
+        integer if we have too few point. 
+
+        The first is to floor every number and then add one to the leaves with the highest
+        fractions until we've hit our budget.
+
+        The second is to floor every number and then add one to the leaves with the smallest
+        number of points. This is the current default.
+
+        If we have too many points, we remove from the largest leaves till we are back in our 
+        budget.
+        '''
+
+        if num_samples_total < self._num_labelled:
+            raise ValueError('The total given number of samples has already been exceeded.')
+
+        if num_samples_total > self._num_points:
+            raise ValueError('The total number of samples is greater than the number of points.')
+
+        if not self._al_proportions_up_to_date:
+            print('Calculating leaf proportions. Please wait')
+            self.al_calculate_leaf_proportions()
+            print('Done!')
+
+        num_samples_left = num_samples_total - self._num_labelled
+
+        # Calculate the optimal (fractional) number of points per leaf
+
+        num_per_leaf_fractions = [x*num_samples_total for x in self._al_proportions]
+
+        # Calculate the number of labelled points that should be added to approach that optimal
+
+        current_num_per_leaf = []
+        for i, node in enumerate(self._full_leaf_list):
+            current_num_per_leaf.append(len(node.labelled_index))
+
+        # print(current_num_per_leaf)
+
+        num_per_leaf = [max(0,math.floor(x) - current_num_per_leaf[i]) for i, x in enumerate(
+            num_per_leaf_fractions)]
+
+        remaining_budget = num_samples_left - sum(num_per_leaf)
+
+        # print(remaining_budget)
+
+        # If we too few points we use one of two heuristics
+
+        if round_by == 'highest':
+            num_per_leaf_fractions = [x - math.floor(x) for x in num_per_leaf_fractions]
+            while remaining_budget > 0:
+                num_per_leaf[num_per_leaf_fractions.index(max(num_per_leaf_fractions))] += 1
+                num_per_leaf_fractions[num_per_leaf_fractions.index(max(num_per_leaf_fractions))] = 0
+                remaining_budget -= 1
+
+                # If we've added one to every leaf, start adding again to smallest leaves.
+
+                if all([x==0 for x in num_per_leaf_fractions]):
+                    num_per_leaf_fractions = [x - math.floor(x) for x in num_per_leaf_fractions]
+
+        elif round_by == 'smallest':
+            total_num_per_leaf = [math.floor(x*num_samples_total) for x in self._al_proportions]
+            while remaining_budget > 0:
+                num_per_leaf[total_num_per_leaf.index(min(total_num_per_leaf))] += 1
+                total_num_per_leaf[total_num_per_leaf.index(min(total_num_per_leaf))] = float('inf')
+                remaining_budget -= 1
+
+                # If we've added one to every leaf, start adding again to smallest leaves.
+
+                if all([math.isinf(x) for x in total_num_per_leaf]):
+                    total_num_per_leaf = [math.floor(x) for x in self._al_proportions]
+
+        else:
+            raise ValueError('Invalid round_by')
+
+        # If we have too many points, we subtract from the leaves with the most total points
+
+        total_num_per_leaf = [math.floor(x) for x in self._al_proportions]
+        while remaining_budget < 0:
+
+            for i, val in enumerate(num_per_leaf):
+                if val == 0:
+                    total_num_per_leaf[i] = float('-inf')
+
+            num_per_leaf[total_num_per_leaf.index(max(total_num_per_leaf))] -= 1
+            # total_num_per_leaf[total_num_per_leaf.index(max(total_num_per_leaf))] = float('-inf')
+            remaining_budget += 1
+
+        self._al_leaf_number_new_labels = num_per_leaf
+
+    def al_calculate_point_probabilities_proportions(self):
+        '''Calculate the corresponding probabilities given to each point in order to achieve
+        the correct leaf proportions. Each point is given weight of the leaf divided by the
+        number of unlabelled points in the leaf.
+        '''
+
+        if not self._al_proportions_up_to_date:
+            print('Calculating leaf proportions. Please wait')
+            self.al_calculate_leaf_proportions()
+            print('Done!')
+
+        point_prob_list = [None] * self._num_points
+        for i, node in enumerate(self._full_leaf_list):
+            for ind in node.unlabelled_index:
+                point_prob_list[ind] = self._al_proportions[i] / len(node.unlabelled_index)
+
+        self._al_point_weights_proportional = point_prob_list
+
+    def al_calculate_point_probabilities_adjustment(self, num_samples_total):
+        '''Calculate the corresponding probabilities given to each point such that in expectation
+        the number of points sampled from each leaf will be the leaf proportion times the 
+        num_samples_total.
+
+        If the leaf has already had more samples than expected, gives probability 0. All 
+        probabilities are normalized to account for rounding issues and passive oversampling of
+        leaves (NOTE: AD HOC SOLUTION TO PROBLEM. MAKE SURE IT MAKES SENSE)
+        '''
+
+        if not self._al_proportions_up_to_date:
+            print('Calculating leaf proportions. Please wait')
+            self.al_calculate_leaf_proportions()
+            print('Done!')
+
+        num_samples_left = num_samples_total - self._num_labelled
+
+        point_prob_list = [None] * self._num_points
+        for i, node in enumerate(self._full_leaf_list):
+            num_already = len(node.labelled_index)
+            num_expected = num_samples_total * self._al_proportions[i]
+            for ind in node.unlabelled_index:
+                point_prob_list[ind] = max(0,
+                    (num_expected - num_already)/(num_samples_left*len(node.unlabelled_index)))
+
+        # print(point_prob_list)
+        tot = sum([x for x in point_prob_list if x is not None])
+        if tot != 0:
+            for i, val in enumerate(point_prob_list):
+                if val is not None:
+                    point_prob_list[i] = point_prob_list[i]/tot
+
+        self._al_point_weights_adjustment = point_prob_list
 
 
 

@@ -148,7 +148,13 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.assertTrue(self.n_labelled in leaf.labelled_index)
 
     def test_label_point_empty(self):
-        self.assertTrue(False, 'Next test to write')
+        with self.assertRaises(ValueError):
+            self.mt1.label_point(1,1)
+
+    def test_label_point_too_big(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        with self.assertRaises(ValueError):
+            self.mt1.label_point(self.n_points+1,1)
 
     def test_label_point(self):
         val = 1
@@ -465,7 +471,6 @@ class test_Mondrian_Tree(unittest.TestCase):
 
     ###########################################
 
-
     # Testing active learning parts
 
     def test_al_calculate_leaf_proportions_empty_root(self):
@@ -513,10 +518,119 @@ class test_Mondrian_Tree(unittest.TestCase):
             # print(val, self.mt1._al_proportions[i])
             self.assertTrue(abs(self.mt1._al_proportions[i] - val) < 1e-9)
 
+    def test_al_calculate_leaf_number_new_labels_empty(self):
+        with self.assertRaises(ValueError):
+            self.mt1.al_calculate_leaf_number_new_labels(1)
 
+    def test_al_calculate_leaf_number_new_labels_too_many_labelled(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        with self.assertRaises(ValueError):
+            self.mt1.al_calculate_leaf_number_new_labels(1)
 
+    def test_al_calculate_leaf_number_new_labels_too_few_points(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        with self.assertRaises(ValueError):
+            self.mt1.al_calculate_leaf_number_new_labels(101)
 
+    def test_al_calculate_leaf_number_new_labels_bad_round_by(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        with self.assertRaises(ValueError):
+            self.mt1.al_calculate_leaf_number_new_labels(21,round_by = 'bad')
 
+    def test_al_calculate_leaf_number_new_labels_root(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        self.mt1.al_calculate_leaf_number_new_labels(21)
+        self.assertEqual(self.mt1._al_leaf_number_new_labels,[1])
+
+    def test_al_calculate_leaf_number_new_labels_single(self):
+        lbda = 0.5
+        seed = 1
+        self.mt1.update_life_time(lbda, set_seed=seed)
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        self.mt1.al_calculate_leaf_number_new_labels(21)
+        # print(self.mt1._al_leaf_number_new_labels)
+        self.assertEqual(sum(self.mt1._al_leaf_number_new_labels),1)
+        
+        # for i, node in enumerate(self.mt1._full_leaf_list):
+        #     curr_num = len(node.labelled_index)
+        #     tot_num = curr_num + self.mt1._al_leaf_number_new_labels[i]
+        #     print(self.mt1._al_leaf_number_new_labels[i],tot_num, self.mt1._al_proportions[i])
+
+    def test_al_calculate_leaf_number_new_labels_many(self):
+        lbda = 0.5
+        seed = 10
+        self.mt1.update_life_time(lbda, set_seed=seed)
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        self.mt1.al_calculate_leaf_number_new_labels(40)
+        # print(self.mt1._al_leaf_number_new_labels)
+        self.assertEqual(sum(self.mt1._al_leaf_number_new_labels),20)
+
+        for i, node in enumerate(self.mt1._full_leaf_list):
+            curr_num = len(node.labelled_index)
+            tot_num = curr_num + self.mt1._al_leaf_number_new_labels[i]
+            print(self.mt1._al_leaf_number_new_labels[i],tot_num, self.mt1._al_proportions[i])
+
+    def test_al_calculate_point_probabilities_proportions_empty(self):
+        with self.assertWarns(UserWarning):
+            self.mt1.al_calculate_leaf_proportions()
+            self.mt1.al_calculate_point_probabilities_proportions()
+        self.assertEqual(self.mt1._al_point_weights_proportional,[])
+
+    def test_al_calculate_point_probabilities_proportions_root(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        self.mt1.al_calculate_point_probabilities_proportions()
+        self.assertEqual(self.mt1._al_point_weights_proportional,
+            [None] * 20 + [1/(self.n_points - self.n_labelled)] * 
+            (self.n_points - self.n_labelled))
+
+    def test_al_calculate_point_probabilities_proportions(self):
+        lbda = 0.5
+        seed = 1
+        self.mt1.update_life_time(lbda, set_seed=seed)
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        self.mt1.al_calculate_point_probabilities_proportions()
+        for i, node in enumerate(self.mt1._full_leaf_list):
+            tot = 0
+            for ind in node.unlabelled_index:
+                tot += self.mt1._al_point_weights_proportional[ind]
+
+            self.assertTrue(abs(tot - self.mt1._al_proportions[i]) < 1e-9)
+
+    def test_al_calculate_point_probabilities_adjustment_empty(self):
+        with self.assertWarns(UserWarning):
+            self.mt1.al_calculate_leaf_proportions()
+            self.mt1.al_calculate_point_probabilities_adjustment(1)
+        self.assertEqual(self.mt1._al_point_weights_adjustment,[])
+
+    def test_al_calculate_point_probabilities_adjustment_root(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        self.mt1.al_calculate_point_probabilities_adjustment(21)
+        for val in self.mt1._al_point_weights_adjustment:
+            if val is not None:  
+                self.assertAlmostEqual(val,1/(self.n_points - self.n_labelled))
+
+    def test_al_calculate_point_probabilities_adjustment(self):
+
+        # TODO: Try and improve this test. It passing is not very informative
+
+        lbda = 0.5
+        seed = 1
+        self.mt1.update_life_time(lbda, set_seed=seed)
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.al_calculate_leaf_proportions()
+        self.mt1.al_calculate_point_probabilities_adjustment(21)
+        self.assertAlmostEqual(sum([x for x in self.mt1._al_point_weights_adjustment if x]),1)
+
+        # for val in self.mt1._al_point_weights_adjustment:
+        #     if not None:
+        #         print(val)
 
 if __name__ == '__main__':
     unittest.main()

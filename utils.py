@@ -27,7 +27,7 @@ def choices(population, weights=None, *, cum_weights=None, k=1):
 
 def unbiased_var(label_list):
     n = len(label_list)
-    if n == 0:
+    if n < 2:
         return 0
 
     mean = sum(label_list)/n
