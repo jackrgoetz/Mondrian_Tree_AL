@@ -537,8 +537,6 @@ class Mondrian_Tree:
         for i, node in enumerate(self._full_leaf_list):
             current_num_per_leaf.append(len(node.labelled_index))
 
-        # print(current_num_per_leaf)
-
         num_per_leaf = [max(0,math.floor(x) - current_num_per_leaf[i]) for i, x in enumerate(
             num_per_leaf_fractions)]
 
@@ -560,7 +558,7 @@ class Mondrian_Tree:
                 num_per_leaf_fractions[num_per_leaf_fractions.index(max(num_per_leaf_fractions))] = 0
                 remaining_budget -= 1
 
-                # If we've added one to every leaf, start adding again to smallest leaves.
+                # If we've added one to every leaf, start adding again to highest fraction leaves.
 
                 if all([x==0 for x in num_per_leaf_fractions]):
                     num_per_leaf_fractions = [x - math.floor(x) for x in num_per_leaf_fractions]
@@ -581,6 +579,8 @@ class Mondrian_Tree:
             raise ValueError('Invalid round_by')
 
         # If we have too many points, we subtract from the leaves with the most total points
+        # under the optimal solution. This occurs when leaves have already exceeded their
+        # optimal sampling number during the random sampling phase.
 
         total_num_per_leaf = [math.floor(x*num_samples_total) for x in self._al_proportions]
         while remaining_budget < 0:
