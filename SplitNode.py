@@ -1,4 +1,4 @@
-
+import copy
 
 class SplitNode:
 
@@ -13,8 +13,8 @@ class SplitNode:
 
     def __init__(self, split_dim, split_val,left_child, right_child, 
         parent_node=None, parent_branch=None, subtree_linear_dim=None):
-        self.split_dim = split_dim
-        self.split_val = split_val
+        self.split_dim = copy.copy(split_dim)
+        self.split_val = copy.copy(split_val)
         self.parent_node = parent_node
         self.parent_branch = parent_branch
         self.left_child = left_child
@@ -38,6 +38,7 @@ class SplitNode:
         and all it's parents. Should be the more efficient way of keeping track of
         subtree_linear_dim during tree building time.
         '''
+        val = copy.copy(val)
         self.subtree_linear_dim += val
         if self.parent_node is not None:
             self.parent_node.percolate_subtree_linear_dim_change(val)

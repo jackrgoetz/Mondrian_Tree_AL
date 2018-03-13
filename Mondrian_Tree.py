@@ -715,14 +715,3 @@ class Mondrian_Tree:
 
         self._al_point_weights_adjustment = point_prob_list
 
-
-
-
-
-
-
-
-
-
-
-

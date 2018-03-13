@@ -1,5 +1,6 @@
 import random
 import math
+import copy
 
 class LeafNode:
 
@@ -18,13 +19,13 @@ class LeafNode:
 
     def __init__(self, labelled_index=None, unlabelled_index=None,linear_dims=None,
         parent_node=None, parent_branch=None):
-        self.labelled_index = labelled_index
+        self.labelled_index = copy.deepcopy(labelled_index)
         if self.labelled_index is None:
             self.labelled_index = []
-        self.unlabelled_index = unlabelled_index
+        self.unlabelled_index = copy.deepcopy(unlabelled_index)
         if self.unlabelled_index is None:
             self.unlabelled_index = []
-        self.linear_dims = linear_dims
+        self.linear_dims = copy.deepcopy(linear_dims)
         if self.linear_dims is None:
             self.linear_dims = []
         self.parent_node = parent_node
@@ -50,6 +51,8 @@ class LeafNode:
         '''Returns the index of points to get labels for, and automatically adds
         them the leafs labelled points by default
         '''
+
+        num_samples = copy.copy(num_samples)
 
         if num_samples > len(self.unlabelled_index):
             raise ValueError('This leaf only has {} < {} unlabelled points'.format(
@@ -81,6 +84,8 @@ class LeafNode:
         If the point is not in the unlabelled_index list it returns an error.
         '''
 
+        index = copy.copy(index)
+
         if index not in self.unlabelled_index:
             raise ValueError('Point {} is not in this leaf'.format(index))
 
@@ -98,12 +103,15 @@ class LeafNode:
         return self
 
     def extend_labelled_index(self, new_labelled_list):
+        new_labelled_list = copy.deepcopy(new_labelled_list)
         self.labelled_index.extend(new_labelled_list)
 
     def extend_unlabelled_index(self, new_unlabelled_list):
+        new_unlabelled_list = copy.deepcopy(new_unlabelled_list)
         self.unlabelled_index.extend(new_unlabelled_list)
 
     def set_linear_dims(self, new_linear_dims):
+        new_linear_dims = copy.deepcopy(new_linear_dims)
         self.linear_dims = new_linear_dims
         self.subtree_linear_dim = self.calculate_subtree_linear_dim()
 
