@@ -429,6 +429,21 @@ class test_Mondrian_Tree(unittest.TestCase):
                 self.d * (1+ (lbda * delta)/math.sqrt(self.d))*
                 math.exp(-lbda * delta/math.sqrt(self.d)))
 
+    def test_limit_number_of_leaves(self):
+        # n_values = [1,10,100,1000,10000,100000]
+        if False:
+            n_values = [1,10,100,1000]
+            d_values = [1,3,5,10,20,50]
+            seed = 1
+            for d_val in d_values:
+                test_tree = Mondrian_Tree([[0,1]]*d_val)
+                print('d = {}'.format(d_val))
+                for n_val in n_values:
+                    test_tree.update_life_time(n_val**(1/(2+d_val)) - 1, set_seed=seed+n_val + d_val)
+                    print(n_val, test_tree._num_leaves, test_tree._num_leaves/n_val)
+
+
+
     ###########################################
 
     # Testing data driven default values for prediction and active learning variance
@@ -637,6 +652,71 @@ class test_Mondrian_Tree(unittest.TestCase):
         # for val in self.mt1._al_point_weights_adjustment:
         #     if not None:
         #         print(val)
+
+    ###########################################
+
+    # Checking reasonable performance of tree
+
+    def test_constant_value_performance_root(self):
+        self.mt1.input_data(self.data, self.labelled_indicies, [1]*self.n_labelled)
+        self.assertEqual(self.mt1.predict([0.5]*self.d),1)
+
+    def test_constant_value_performance(self):
+        seed = 1
+        self.mt1.input_data(self.data, self.labelled_indicies, [1]*self.n_labelled)
+        self.mt1.update_life_time(0.5,set_seed=seed)
+        self.assertEqual(self.mt1.predict([0.5]*self.d),1)
+
+    def test_OLS_noiseless_better_than_mean(self):
+        seed = 1
+        labs = []
+        for i in self.data[:self.n_labelled]:
+            labs.append(sum(i))
+        self.mt1.input_data(self.data, self.labelled_indicies, labs)
+        self.mt1.update_life_time(0.5,set_seed=seed)
+        self.mt1.make_full_leaf_list()
+        # for i, node  in enumerate(self.mt1._full_leaf_list):
+        #     print(len(node.labelled_index))
+        test_labs = []
+        for i in self.data[self.n_labelled:]:
+            test_labs.append(sum(i))
+        test_mean = sum(test_labs) / len(test_labs)
+        SST = 0
+        SSE = 0
+
+        for point in self.data[self.n_labelled:]:
+            SST += (sum(point) - test_mean)**2
+            SSE += (sum(point) - self.mt1.predict(point))**2
+
+        # print(SST, SSE)
+        self.assertTrue(SST > SSE)
+
+    def test_OLS_better_than_mean(self):
+        seed = 1
+        std = 0.1
+        labs = []
+        for i in self.data[:self.n_labelled]:
+            val = sum(i) + random.normalvariate(0,std)
+            print(sum(i),val)
+            labs.append(val)
+        self.mt1.input_data(self.data, self.labelled_indicies, labs)
+        self.mt1.update_life_time(0.5,set_seed=seed)
+        self.mt1.make_full_leaf_list()
+        # for i, node  in enumerate(self.mt1._full_leaf_list):
+        #     print(len(node.labelled_index))
+        test_labs = []
+        for i in self.data[self.n_labelled:]:
+            test_labs.append(sum(i) + random.normalvariate(0,std))
+        test_mean = sum(test_labs) / len(test_labs)
+        SST = 0
+        SSE = 0
+
+        for point in self.data[self.n_labelled:]:
+            SST += (sum(point) - test_mean)**2
+            SSE += (sum(point) - self.mt1.predict(point))**2
+
+        print(SST, SSE)
+        self.assertTrue(SST > SSE)
 
 if __name__ == '__main__':
     unittest.main()
