@@ -4,6 +4,8 @@ import random
 import warnings
 import utils
 
+import numpy as np
+
 from Mondrian_Tree import Mondrian_Tree
 from LeafNode import LeafNode
 
@@ -55,6 +57,21 @@ class test_Mondrian_Tree(unittest.TestCase):
 
         self.mt1.update_life_time(self.a * self.n_labelled**(1/(2+self.d) - 1),set_seed=1)
         self.assertEqual(self.mt1._num_leaves,2)
+
+    def test__test_point(self):
+        with self.assertRaises(ValueError):
+            self.mt1._test_point([])
+            self.mt1._test_point([1,2,3,4,5])
+        with self.assertRaises(TypeError):
+            self.mt1._test_point(1)
+            self.mt1._test_point({})
+            self.mt1._test_point('abc')
+
+        good_point = [1]*self.d
+        self.assertEqual(good_point, self.mt1._test_point(good_point))
+        self.assertEqual(good_point, self.mt1._test_point(np.array(good_point)))
+
+    ###########################################
 
     # Testing input data
 
@@ -138,6 +155,37 @@ class test_Mondrian_Tree(unittest.TestCase):
                     self.assertTrue(point[dim] >= linear_dims[dim][0])
                     self.assertTrue(point[dim] <= linear_dims[dim][1])
 
+    def test_input_data_with_numpy(self):
+        lbda = 0.5
+        self.mt1.update_life_time(lbda, set_seed=100)
+        np_data = np.array(self.data)
+        # print(np_data)
+        np_labels = np.array(self.labels)
+        self.mt1.input_data(np_data, self.labelled_indicies, np_labels)
+
+        self.assertEqual(self.mt1._num_points,self.n_points)
+        self.assertEqual(self.mt1._num_labelled,self.n_labelled)
+        
+        self.mt1.make_full_leaf_list()
+        for node in self.mt1._full_leaf_list:
+            # print(len(node.labelled_index), len(node.unlabelled_index))
+
+            linear_dims = node.linear_dims
+            for ind in node.labelled_index:
+                point = self.mt1.points[ind]
+                for dim in range(self.d):
+                    # print(linear_dims[dim][0], point[dim], linear_dims[dim][1])
+                    self.assertTrue(point[dim] >= linear_dims[dim][0])
+                    self.assertTrue(point[dim] <= linear_dims[dim][1])
+
+            for ind in node.unlabelled_index:
+                point = self.mt1.points[ind]
+                for dim in range(self.d):
+                    # print(linear_dims[dim][0], point[dim], linear_dims[dim][1])
+                    self.assertTrue(point[dim] >= linear_dims[dim][0])
+                    self.assertTrue(point[dim] <= linear_dims[dim][1])
+
+
     def test_label_point_root(self):
         val = 1
         self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
@@ -148,7 +196,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.assertTrue(self.n_labelled in leaf.labelled_index)
 
     def test_label_point_empty(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(RuntimeError):
             self.mt1.label_point(1,1)
 
     def test_label_point_too_big(self):
@@ -168,6 +216,51 @@ class test_Mondrian_Tree(unittest.TestCase):
         leaf = self.mt1._root.leaf_for_point(self.data[self.n_labelled])
         # print(leaf.labelled_index)
         self.assertTrue(self.n_labelled in leaf.labelled_index)
+
+    def test_add_data_point_bad(self):
+        with self.assertRaises(TypeError):
+            self.mt1.add_data_point(1)
+
+    def test_add_data_point_empty(self):
+        self.mt1.add_data_point([1]*self.d)
+        self.assertEqual([[1]*self.d], self.mt1.points)
+        self.assertEqual([None], self.mt1.labels)
+        self.assertEqual(self.mt1._root.unlabelled_index,[0])
+        self.assertEqual(self.mt1._root.labelled_index,[])
+
+    def test_add_data_point_empty_2(self):
+        self.mt1.add_data_point([1]*self.d,2)
+        self.assertEqual([[1]*self.d], self.mt1.points)
+        self.assertEqual([2], self.mt1.labels)
+        self.assertEqual(self.mt1._root.unlabelled_index,[])
+        self.assertEqual(self.mt1._root.labelled_index,[0])
+
+    def test_add_data_point(self):
+        lbda = 0.5
+        seed = 1
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.update_life_time(lbda, set_seed=seed)
+
+        self.mt1.add_data_point([1]*self.d)
+        self.assertEqual(self.data + [[1]*self.d], self.mt1.points)
+        self.assertEqual(self.labels + [None] * (self.n_points - self.n_labelled) + 
+            [None], self.mt1.labels)
+        leaf = self.mt1._root.leaf_for_point([1]*self.d)
+        self.assertEqual(leaf.unlabelled_index[-1],self.n_points)
+
+    def test_add_data_point(self):
+        lbda = 0.5
+        seed = 1
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.update_life_time(lbda, set_seed=seed)
+
+        self.mt1.add_data_point([1]*self.d,1)
+        self.assertEqual(self.data + [[1]*self.d], self.mt1.points)
+        self.assertEqual(self.labels + [None] * (self.n_points - self.n_labelled) + 
+            [1], self.mt1.labels)
+        leaf = self.mt1._root.leaf_for_point([1]*self.d)
+        self.assertEqual(leaf.labelled_index[-1],self.n_points)
+
 
     ###########################################
 
@@ -287,6 +380,11 @@ class test_Mondrian_Tree(unittest.TestCase):
             self.mt1.predict(1)
             self.mt1.get_points_in_same_leaf(1)
 
+    def test_predict_and_get_point_in_same_leaf_bad_input_2(self):
+        with self.assertRaises(TypeError):
+            self.mt1.predict('abc')
+            self.mt1.get_points_in_same_leaf('abc')
+
     def test_predict_and_get_point_in_same_leaf_bad_length(self):
         with self.assertRaises(ValueError):
             self.mt1.predict([])
@@ -329,6 +427,25 @@ class test_Mondrian_Tree(unittest.TestCase):
         # print(pred)
 
         node = self.mt1._root.leaf_for_point(new_point)
+        vals = [self.labels[x] for x in node.labelled_index]
+        # print(len(vals))
+        self.assertEqual(pred, sum(vals)/len(vals))
+
+    def test_predict_leaf_list_numpy(self):
+        lbda = 0.5
+        seed = 1
+        self.mt1.update_life_time(lbda, set_seed=100)
+        self.mt1.make_full_leaf_list()
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+
+        random.seed(seed)
+        new_point = []
+        for j in range(self.d):
+            new_point.append(random.random())
+        pred = self.mt1.predict(new_point)
+        # print(pred)
+
+        node = self.mt1._root.leaf_for_point(np.array(new_point))
         vals = [self.labels[x] for x in node.labelled_index]
         # print(len(vals))
         self.assertEqual(pred, sum(vals)/len(vals))
@@ -697,7 +814,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         labs = []
         for i in self.data[:self.n_labelled]:
             val = sum(i) + random.normalvariate(0,std)
-            print(sum(i),val)
+            # print(sum(i),val)
             labs.append(val)
         self.mt1.input_data(self.data, self.labelled_indicies, labs)
         self.mt1.update_life_time(0.5,set_seed=seed)
@@ -715,7 +832,7 @@ class test_Mondrian_Tree(unittest.TestCase):
             SST += (sum(point) - test_mean)**2
             SSE += (sum(point) - self.mt1.predict(point))**2
 
-        print(SST, SSE)
+        # print(SST, SSE)
         self.assertTrue(SST > SSE)
 
 if __name__ == '__main__':

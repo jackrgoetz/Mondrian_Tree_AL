@@ -65,6 +65,33 @@ class Mondrian_Tree:
             self._num_dimensions, self._num_leaves, self._life_time, self._num_points, 
             self._num_labelled))
 
+    def _test_point(self, new_point):
+        '''Tests an input point, raising errors if it's a bad type and converting it from
+        a numpy array to a list if needed 
+        '''
+
+        try:
+            len(new_point)
+        except TypeError:
+            raise TypeError(
+                'Given point has no len(), so probably is not a vector representing a data point. '
+                'Try turning it into a list, tuple or numpy array where each entry is a dimension.')
+
+        if len(new_point) != self._num_dimensions:
+            raise ValueError(
+                'Data point is not of the correct length. Must be the same dimension as the '
+                'dimensions used to build the Mondrian Tree when it was initialized.')
+
+        if str(type(new_point)) == "<class 'numpy.ndarray'>":
+            if self._verbose:
+                print('Converting new_point to list internally')
+            new_point = new_point.tolist()
+
+        if type(new_point) not in [list, tuple]:
+            raise TypeError('Please input the new point as a list, tuple or numpy array')
+
+        return new_point
+
     ###########################################
 
     # Tree building and updating methods: Builds the tree based on the life time, and
@@ -78,6 +105,8 @@ class Mondrian_Tree:
         growing the tree. Grows until the next split would occur after the new life
         time, moving any data within the tree into the new leaves.
         '''
+
+        new_life_time = copy.copy(new_life_time)
 
         if new_life_time < self._life_time:
             raise ValueError('The new life time {} must be larger than the old one {}.\
@@ -211,6 +240,10 @@ class Mondrian_Tree:
         safely use numpy arrays. 
         '''
 
+        all_data = copy.deepcopy(all_data)
+        labelled_indicies = copy.deepcopy(labelled_indicies)
+        labels = copy.deepcopy(labels)
+
         if len(all_data) < len(labelled_indicies):
             raise ValueError('Cannot have more labelled indicies than points')
 
@@ -221,6 +254,21 @@ class Mondrian_Tree:
             if len(point) != self._num_dimensions:
                 raise ValueError('All data points must be of the dimension on which this \
                     Mondrian Tree is built ({})'.format(self._num_dimensions))
+
+        if str(type(all_data)) == "<class 'numpy.ndarray'>":
+            if self._verbose:
+                print('Converting all_data to list of lists internally')
+            all_data = all_data.tolist()
+
+        if str(type(labelled_indicies)) == "<class 'numpy.ndarray'>":
+            if self._verbose:
+                print('Converting labelled_indicies to list internally')
+            labelled_indicies = labelled_indicies.tolist()
+
+        if str(type(labels)) == "<class 'numpy.ndarray'>":
+            if self._verbose:
+                print('Converting labels to list internally')
+            labels = labels.tolist()
 
         self.points = all_data
         self._num_points = len(self.points)
@@ -255,10 +303,13 @@ class Mondrian_Tree:
         '''
 
         if self.labels is None:
-            raise ValueError('No data in the tree')
+            raise RuntimeError('No data in the tree')
 
         if len(self.labels) <= index:
             raise ValueError('Index {} larger than size of data in tree'.format(index))
+
+        value = copy.copy(value)
+        index = copy.copy(index)
 
         self.labels[index] = value
         leaf = self._root.leaf_for_point(self.points[index])
@@ -266,6 +317,37 @@ class Mondrian_Tree:
         self._num_labelled += 1
         self._full_leaf_mean_list_up_to_date = False
         self._full_leaf_var_list_up_to_date = False
+
+    def add_data_point(self, new_point, label = None):
+        '''Adds an additional data point to the tree, with the option of adding a label
+        as well. Automatically makes it the _num_points-th point.
+
+        Does NOT automatically grow the tree larger so you need to do that yourself.
+        '''
+
+        new_point = copy.deepcopy(new_point)
+        label = copy.deepcopy(label)
+        new_point = self._test_point(new_point)
+
+        if self.points is None:
+            point_index = 0
+            self.points = [new_point]
+            self.labels = [label]
+        else:
+            point_index = len(self.labels)
+            self.points.append(new_point)
+            self.labels.append(label)
+
+        leaf = self._root.leaf_for_point(new_point)
+        if label is None:
+            leaf.unlabelled_index.append(point_index)
+        else:
+            leaf.labelled_index.append(point_index)
+
+        self._full_leaf_marginal_list_up_to_date = False
+        if label is not None:
+            self._full_leaf_mean_list_up_to_date = False
+            self._full_leaf_var_list_up_to_date = False
 
     ###########################################
 
@@ -276,7 +358,8 @@ class Mondrian_Tree:
 
     def make_full_leaf_list(self):
         '''Makes a list with pointers to every leaf in the tree. Likely to be expensive so 
-        only do this if you're pre-building a tree for extensive use later. 
+        only do this if you're pre-building a tree for extensive use later. Not needed for
+        things like prediction, but needed for cell statistics and active learning.
         '''
 
         full_leaf_list = []
@@ -363,17 +446,8 @@ class Mondrian_Tree:
 
         '''Make prediction for a data point using the mean of that leaf'''
 
-        try:
-            len(new_point)
-        except TypeError:
-            raise TypeError(
-                'Given point has no len(), so probably is not a vector representing a data point. '
-                'Try turning it into a list, tuple or numpy array where each entry is a dimension.')
-
-        if len(new_point) != self._num_dimensions:
-            raise ValueError(
-                'Data point is not of the correct length. Must be the same dimension as the '
-                'dimensions used to build the Mondrian Tree when it was initialized.')
+        new_point = copy.deepcopy(new_point)
+        new_point = self._test_point(new_point)
 
         correct_leaf = self._root.leaf_for_point(new_point)
         if len(correct_leaf.labelled_index) == 0:
@@ -402,17 +476,8 @@ class Mondrian_Tree:
         'labelled' or 'unlabelled'
         '''
 
-        try:
-            len(new_point)
-        except TypeError:
-            raise TypeError(
-                'Given point has no len(), so probably is not a vector representing a data point. '
-                'Try turning it into a list, tuple or numpy array where each entry is a dimension.')
-
-        if len(new_point) != self._num_dimensions:
-            raise ValueError(
-                'Data point is not of the correct length. Must be the same dimension as the '
-                'dimensions used to build the Mondrian Tree when it was initialized.')
+        new_point = copy.deepcopy(new_point)
+        new_point = self._test_point(new_point)
 
         correct_leaf = self._root.leaf_for_point(new_point)
         if which_index_list == 'labelled':
@@ -513,6 +578,7 @@ class Mondrian_Tree:
         If we have too many points, we remove from the largest leaves till we are back in our 
         budget.
         '''
+        num_samples_total = copy.copy(num_samples_total)
 
         if num_samples_total < self._num_labelled:
             raise ValueError('The total given number of samples has already been exceeded.')
@@ -622,6 +688,8 @@ class Mondrian_Tree:
         probabilities are normalized to account for rounding issues and passive oversampling of
         leaves (NOTE: AD HOC SOLUTION TO PROBLEM. MAKE SURE IT MAKES SENSE)
         '''
+
+        num_samples_total = copy.copy(num_samples_total)
 
         if not self._al_proportions_up_to_date:
             print('Calculating leaf proportions. Please wait')
