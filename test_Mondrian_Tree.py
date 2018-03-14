@@ -450,6 +450,33 @@ class test_Mondrian_Tree(unittest.TestCase):
         # print(len(vals))
         self.assertEqual(pred, sum(vals)/len(vals))
 
+    def test_predict_multi_values(self):
+        num_preds = 10
+        lbda = 0.5
+        seed = 1
+        self.mt1.update_life_time(lbda, set_seed=100)
+        self.mt1.make_full_leaf_list()
+        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+
+        random.seed(seed)
+        new_points = []
+        for i in range(num_preds):
+            new_point = []
+            for j in range(self.d):
+                new_point.append(random.random())
+            new_points.append(new_point)
+        preds = self.mt1.predict(new_points)
+        # print(pred)
+
+        check_preds = []
+        for i in range(num_preds):
+
+            node = self.mt1._root.leaf_for_point(np.array(new_points[i]))
+            vals = [self.labels[x] for x in node.labelled_index]
+            check_preds.append(sum(vals)/len(vals))
+        # print(len(vals))
+        self.assertAlmostEqual(preds, check_preds)
+
     def test_get_point_in_same_leaf_labelled(self):
         lbda = 0.5
         seed = 1

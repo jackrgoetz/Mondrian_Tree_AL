@@ -444,7 +444,31 @@ class Mondrian_Tree:
 
     def predict(self, new_point):
 
-        '''Make prediction for a data point using the mean of that leaf'''
+        '''Make prediction for a data point using the mean of that leaf. If a list of points is
+        given returns a list of predictions.
+        '''
+
+        try:
+            if len(new_point) == 0:
+                raise ValueError('No data in this new_point')
+        except TypeError:
+            raise TypeError(
+                'Given object has no len() so it is not a point or list of '
+                'points.')
+        depth = lambda L: isinstance(L, list) and max(map(depth, L))+1
+        new_point_depth = depth(new_point)
+        if new_point_depth > 2:
+            raise ValueError('Input has too many nested structures')
+
+        if new_point_depth == 2 or (str(type(new_point)) == "<class 'numpy.ndarray'>" and 
+            len(new_point.shape) == 2):
+            preds = []
+            for i in range(len(new_point)):
+                # print(len(new_point[i]))
+                # print(new_point[i])
+                preds.append(self.predict(new_point[i]))
+            return preds
+
 
         new_point = copy.deepcopy(new_point)
         new_point = self._test_point(new_point)
