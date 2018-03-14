@@ -15,7 +15,7 @@ class LeafNode:
         parent_branch (int): This node's branch (0 for left, 1 for right)
     '''
 
-    leaf_ids = 0
+    # leaf_ids = 0
 
     def __init__(self, labelled_index=None, unlabelled_index=None,linear_dims=None,
         parent_node=None, parent_branch=None):
@@ -32,8 +32,9 @@ class LeafNode:
         self.parent_branch = parent_branch
         self.subtree_linear_dim = self.calculate_subtree_linear_dim()
 
-        LeafNode.leaf_ids+= 1
-        self.leaf_id = LeafNode.leaf_ids
+        # LeafNode.leaf_ids+= 1
+        # self.leaf_id = LeafNode.leaf_ids
+        self.leaf_id = None
 
         self.full_leaf_list_pos = None
 

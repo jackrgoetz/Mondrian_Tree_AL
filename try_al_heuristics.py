@@ -1,4 +1,3 @@
-from sklearn.tree import DecisionTreeRegressor
 from Mondrian_Tree import Mondrian_Tree
 
 import numpy as np
@@ -40,33 +39,34 @@ n, p = X_train.shape
 seed = 14
 
 MT = Mondrian_Tree([[0,1]]*p)
-MT.update_life_time(n**(1/(2+p))-1, set_seed=seed)
+MT.update_life_time((n+500)**(1/(2+p))-1, set_seed=seed)
 # print(MT._num_leaves)
-MT.input_data(X_train, range(1000), y_train)
+MT.input_data(X, range(1000), y_train)
 
-MT.make_full_leaf_list()
-MT.make_full_leaf_var_list()
+MT.update_leaf_lists()
 used_leaf_counter = 0
 for node in MT._full_leaf_list:
     if len(node.labelled_index) != 0:
-        print(len(node.labelled_index), node.calculate_cell_l2_diameter())
+        # print(len(node.labelled_index), node.calculate_cell_l2_diameter())
         # print('var = {}'.format(MT._full_leaf_var_list[node.full_leaf_list_pos]))
         used_leaf_counter += 1
 print('number of used leaves = {}'.format(used_leaf_counter))
 MT.al_set_default_var_global_var()
 # print(MT.al_default_var)
 
-MT.set_default_pred_global_mean()
+MT.al_calculate_leaf_proportions()
+MT.al_calculate_leaf_number_new_labels(1500)
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    MT_preds = MT.predict(X_test)
-MT_preds = np.array(MT_preds)
+for i, node in enumerate(MT._full_leaf_list):
+    curr_num = len(node.labelled_index)
+    tot_num = curr_num + MT._al_leaf_number_new_labels[i]
+    print(curr_num,tot_num, MT._al_proportions[i],MT._al_leaf_number_new_labels[i])
 
-print(sum(1/n*(y_test - MT_preds)**2))
+# MT.set_default_pred_global_mean()
 
-BT = DecisionTreeRegressor(random_state=seed, max_leaf_nodes = used_leaf_counter)
-BT.fit(X_train, y_train)
-BT_preds = BT.predict(X_test)
+# with warnings.catch_warnings():
+#     warnings.simplefilter("ignore")
+#     MT_preds = MT.predict(X_test)
+# MT_preds = np.array(MT_preds)
 
-print(sum(1/n*(y_test - BT_preds)**2))
+# print(sum(1/n*(y_test - MT_preds)**2))

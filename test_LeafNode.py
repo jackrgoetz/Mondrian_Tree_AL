@@ -23,9 +23,9 @@ class test_LeafNode(unittest.TestCase):
 
     # Testing the leaf ids
 
-    def test_leaf_id(self):
-        self.assertEqual(self.test_leaf_empty.leaf_id,1)
-        self.assertEqual(self.test_leaf_good.leaf_id,2)
+    # def test_leaf_id(self):
+    #     self.assertEqual(self.test_leaf_empty.leaf_id,1)
+    #     self.assertEqual(self.test_leaf_good.leaf_id,2)
 
     # Testing the subtree_linear_dim method
 
