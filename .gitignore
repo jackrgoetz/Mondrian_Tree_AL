@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 
 data_sets/
+
+\.fuse_hidden000007b800000001

@@ -22,6 +22,7 @@ for i in range(X.shape[1]):
 y = data[:,-1]
 
 train_test_seed = 1
+np.random.seed(train_test_seed)
 
 cv_ind = np.random.permutation(range(X.shape[0]))
 
@@ -37,12 +38,12 @@ y_test = y[test_ind]
 n, p = X_train.shape
 # print(n,p)
 
-seed = 14
+seed = 3
 
 MT = Mondrian_Tree([[0,1]]*p)
 MT.update_life_time(n**(1/(2+p))-1, set_seed=seed)
 # print(MT._num_leaves)
-MT.input_data(X_train, range(1000), y_train)
+MT.input_data(np.concatenate((X_train, X_test),axis=0), range(1000), y_train)
 
 MT.make_full_leaf_list()
 MT.make_full_leaf_var_list()
