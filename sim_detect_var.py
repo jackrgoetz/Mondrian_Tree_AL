@@ -87,7 +87,7 @@ with warnings.catch_warnings():
     MT_preds = MT.predict(X_test)
 MT_preds = np.array(MT_preds)
 
-print(sum(1/X_test.shape[0]*(y_test - MT_preds)**2))
+print('MSE from AL = {}'.format(sum(1/X_test.shape[0]*(y_test - MT_preds)**2)))
 
 MT2 = Mondrian_Tree([[0,1]]*p)
 MT2.update_life_time(n_final**(1/(2+p))-1, set_seed=seed)
@@ -98,4 +98,6 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     MT2_preds = MT2.predict(X_test)
 MT2_preds = np.array(MT2_preds)
-print(sum(1/X_test.shape[0]*(y_test - MT2_preds)**2))
+# print(MT2_preds)
+print('MSE from random = {}'.format(sum(1/X_test.shape[0]*(y_test - MT2_preds)**2)))
+print('MSE from oracle = {}'.format(sum(1/X_test.shape[0]*(y_test)**2)))
