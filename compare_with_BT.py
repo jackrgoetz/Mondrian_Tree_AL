@@ -2,7 +2,7 @@ from sklearn.tree import DecisionTreeRegressor
 from Mondrian_Tree import Mondrian_Tree
 
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import warnings
 
 def scale_zero_one(col):
@@ -64,10 +64,10 @@ with warnings.catch_warnings():
     MT_preds = MT.predict(X_test)
 MT_preds = np.array(MT_preds)
 
-print(sum(1/n*(y_test - MT_preds)**2))
+print(sum(1/X_test.shape[0]*(y_test - MT_preds)**2))
 
 BT = DecisionTreeRegressor(random_state=seed, max_leaf_nodes = used_leaf_counter)
 BT.fit(X_train, y_train)
 BT_preds = BT.predict(X_test)
 
-print(sum(1/n*(y_test - BT_preds)**2))
+print(sum(1/X_test.shape[0]*(y_test - BT_preds)**2))

@@ -1,8 +1,6 @@
 from Mondrian_Tree import Mondrian_Tree
-
-import numpy as np
-import matplotlib.pyplot as plt
 import warnings
+import numpy as np
 
 def scale_zero_one(col):
 
@@ -21,6 +19,7 @@ for i in range(X.shape[1]):
 y = data[:,-1]
 
 train_test_seed = 1
+np.random.seed(train_test_seed)
 
 cv_ind = np.random.permutation(range(X.shape[0]))
 
@@ -39,9 +38,9 @@ n, p = X_train.shape
 seed = 14
 
 MT = Mondrian_Tree([[0,1]]*p)
-MT.update_life_time((n+500)**(1/(2+p))-1, set_seed=seed)
+MT.update_life_time(X.shape[0]**(1/(2+p))-1, set_seed=seed)
 # print(MT._num_leaves)
-MT.input_data(X, range(1000), y_train)
+MT.input_data(np.concatenate((X_train, X_test),axis=0), range(1000), y_train)
 
 MT.update_leaf_lists()
 used_leaf_counter = 0
@@ -60,7 +59,7 @@ MT.al_calculate_leaf_number_new_labels(1500)
 for i, node in enumerate(MT._full_leaf_list):
     curr_num = len(node.labelled_index)
     tot_num = curr_num + MT._al_leaf_number_new_labels[i]
-    print(curr_num,tot_num, MT._al_proportions[i],MT._al_leaf_number_new_labels[i])
+    print(curr_num,tot_num, MT._al_proportions[i] * 1500,MT._al_leaf_number_new_labels[i])
 
 # MT.set_default_pred_global_mean()
 
