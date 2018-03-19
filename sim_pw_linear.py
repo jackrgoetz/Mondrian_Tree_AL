@@ -1,5 +1,7 @@
 from data_sets.toy_data_pw_linear import toy_data_pw_linear
 from Mondrian_Tree import Mondrian_Tree
+from sklearn.tree import DecisionTreeRegressor
+
 import numpy as np
 import warnings
 import itertools
@@ -48,7 +50,7 @@ y = y[cv_ind]
 n, p = X_train.shape
 # print(n,p)
 
-seed = 13
+seed = 1
 
 MT = Mondrian_Tree([[0,1]]*p)
 MT.update_life_time(n_final**(1/(2+p))-1, set_seed=seed)
@@ -70,6 +72,7 @@ print(MT.al_default_var)
 MT.al_calculate_leaf_proportions()
 MT.al_calculate_leaf_number_new_labels(n_final)
 
+new_labelled_points = []
 for i, node in enumerate(MT._full_leaf_list):
     # print(i)
     curr_num = len(node.labelled_index)
@@ -78,6 +81,7 @@ for i, node in enumerate(MT._full_leaf_list):
     num_new_points = MT._al_leaf_number_new_labels[i]
     labels_to_add = node.pick_new_points(num_new_points,self_update = False, set_seed = seed*i)
     # print(labels_to_add)
+    new_labelled_points.extend(labels_to_add)
     for ind in labels_to_add:
         MT.label_point(ind, y[ind])
 
@@ -127,6 +131,21 @@ for point in point_grid:
 MT_oracle = Mondrian_Tree([[0,1]]*p)
 MT_oracle.update_life_time(n_final**(1/(2+p))-1, set_seed=seed)
 MT_oracle.input_data(point_grid, range(len(function_vals)), function_vals)
-oracle_preds = MT_oracle.predict(X_test)
+MT2.set_default_pred_global_mean()
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    oracle_preds = MT_oracle.predict(X_test)
 
 print('MSE from oracle = {}'.format(sum(1/X_test.shape[0]*(y_test - oracle_preds)**2)))
+
+# Comparing AL and passive using BT as final classifier. 
+
+BT_al = DecisionTreeRegressor(random_state=seed, max_leaf_nodes = MT._num_leaves)
+BT_al.fit(X[list(range(n_start)) + new_labelled_points,:], y[list(range(n_start)) + new_labelled_points])
+BT_al_preds = BT_al.predict(X_test)
+print('MSE from BT_al = {}'.format(sum(1/X_test.shape[0]*(y_test - BT_al_preds)**2)))
+
+BT_rn = DecisionTreeRegressor(random_state=seed, max_leaf_nodes = MT._num_leaves)
+BT_rn.fit(X[list(range(n_final)),:], y[list(range(n_final))])
+BT_rn_preds = BT_rn.predict(X_test)
+print('MSE from BT_rn = {}'.format(sum(1/X_test.shape[0]*(y_test - BT_rn_preds)**2)))
