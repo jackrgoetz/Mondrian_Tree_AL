@@ -240,21 +240,24 @@ import matplotlib.pyplot as plt
 
 # Mixtures of normals
 
-p1 = 0.8
+# compare (0.95, -2, 2, 1, 1) to (0.59, -2,2,1,1). Both have same s,k but one has ratio < 1 and other >1
+# (0.9, 1,-1,1,1) have an example where k < 0 but ratio <1
+
+p1 = 0.9
 p2 = 1-p1
 
-mu1 = -.2
-mu2 = .2
+mu1 = 1
+mu2 = -1
 
-std1 = 2
-std2 = 2
+std1 = 1
+std2 = 1
 
 mu = p1*mu1 + p2*mu2
 
 samp_var = 1* (p1*std1**2 + p2*std2**2 + p1*mu1**2 + p2*mu2**2 - (p1*mu1 + p2*mu2)**2)
 
 n = 10
-reps = 100000
+reps = 1000000
 
 counter = 0
 ests = []
@@ -290,6 +293,7 @@ print('Skewness is {}'.format(s))
 print('Excess Kurtosis is {}'.format(k))
 print(np.mean(ests))
 print( (p1*std1**2 + p2*std2**2 + p1*mu1**2 + p2*mu2**2 - (p1*mu1 + p2*mu2)**2) * 1/n )
+print(np.mean(ests) / ((p1*std1**2 + p2*std2**2 + p1*mu1**2 + p2*mu2**2 - (p1*mu1 + p2*mu2)**2) * 1/n))
 
 # plt.hist(means, bins = 50)
 # plt.show()

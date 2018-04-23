@@ -624,11 +624,22 @@ class Mondrian_Tree:
         # Calculate the number of labelled points that should be added to approach that optimal
 
         current_num_per_leaf = []
+        unlabelled_num_per_leaf = []
         for i, node in enumerate(self._full_leaf_list):
             current_num_per_leaf.append(len(node.labelled_index))
+            unlabelled_num_per_leaf.append(len(node.unlabelled_index))
 
         num_per_leaf = [max(0,math.floor(x) - current_num_per_leaf[i]) for i, x in enumerate(
             num_per_leaf_fractions)]
+
+        # Correct for if leaves have too few unlabelled points to get to the optimal number
+
+        full_leaves = []
+
+        for i, num in enumerate(num_per_leaf):
+            if num > unlabelled_num_per_leaf[i]:
+                num_per_leaf = unlabelled_num_per_leaf[i]
+                full_leaves.append(i)
 
         remaining_budget = num_samples_left - sum(num_per_leaf)
         if abs(remaining_budget/num_samples_left) > 0.1:
@@ -643,6 +654,8 @@ class Mondrian_Tree:
 
         if round_by == 'highest':
             num_per_leaf_fractions = [x - math.floor(x) for x in num_per_leaf_fractions]
+            for ind in full_leaves:
+                num_per_leaf_fractions[ind] = 0
             while remaining_budget > 0:
                 num_per_leaf[num_per_leaf_fractions.index(max(num_per_leaf_fractions))] += 1
                 num_per_leaf_fractions[num_per_leaf_fractions.index(max(num_per_leaf_fractions))] = 0
@@ -652,9 +665,13 @@ class Mondrian_Tree:
 
                 if all([x==0 for x in num_per_leaf_fractions]):
                     num_per_leaf_fractions = [x - math.floor(x) for x in num_per_leaf_fractions]
+                    for ind in full_leaves:
+                        num_per_leaf_fractions[ind] = 0
 
         elif round_by == 'smallest':
             total_num_per_leaf = [math.floor(x*num_samples_total) for x in self._al_proportions]
+            for ind in full_leaves:
+                total_num_per_leaf[ind] = float('inf')
             while remaining_budget > 0:
                 num_per_leaf[total_num_per_leaf.index(min(total_num_per_leaf))] += 1
                 total_num_per_leaf[total_num_per_leaf.index(min(total_num_per_leaf))] = float('inf')
@@ -663,7 +680,9 @@ class Mondrian_Tree:
                 # If we've added one to every leaf, start adding again to smallest leaves.
 
                 if all([math.isinf(x) for x in total_num_per_leaf]):
-                    total_num_per_leaf = [math.floor(x) for x in self._al_proportions]
+                    total_num_per_leaf = [math.floor(x*num_samples_total) for x in self._al_proportions]
+                    for ind in full_leaves:
+                        total_num_per_leaf[ind] = float('inf')
 
         else:
             raise ValueError('Invalid round_by')
