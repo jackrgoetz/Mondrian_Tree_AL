@@ -639,15 +639,17 @@ class Mondrian_Tree:
         full_leaves = []
 
         for i, num in enumerate(num_per_leaf):
-            if num > unlabelled_num_per_leaf[i]:
-                num_per_leaf = unlabelled_num_per_leaf[i]
+            if num >= unlabelled_num_per_leaf[i]:
+                num_per_leaf[i] = unlabelled_num_per_leaf[i]
                 full_leaves.append(i)
+                # print(i, num)
+        # print(full_leaves)
 
         remaining_budget = num_samples_left - sum(num_per_leaf)
         if abs(remaining_budget/num_samples_left) > 0.1:
             warnings.warn('remaining_budget is = {} fraction of number of new samples. '
             'It may not be possible to get close to the optimal solution given the current locations '
-            'of labelled data.'.format(abs(remaining_budget/num_samples_left))
+            'of labelled data.'.format(round(abs(remaining_budget/num_samples_left),3))
             )
 
         # print(remaining_budget)
@@ -668,8 +670,8 @@ class Mondrian_Tree:
                 if all([x==0 for x in num_per_leaf_fractions]):
                     num_per_leaf_fractions = [x - math.floor(x) for x in num_per_leaf_fractions]
                     for i, num in enumerate(num_per_leaf):
-                        if num > unlabelled_num_per_leaf[i]:
-                            num_per_leaf = unlabelled_num_per_leaf[i]
+                        if num >= unlabelled_num_per_leaf[i]:
+                            num_per_leaf[i] = unlabelled_num_per_leaf[i]
                             full_leaves.append(i)
                     for ind in full_leaves:
                         num_per_leaf_fractions[ind] = 0
@@ -688,8 +690,8 @@ class Mondrian_Tree:
                 if all([math.isinf(x) for x in total_num_per_leaf]):
                     total_num_per_leaf = [math.floor(x*num_samples_total) for x in self._al_proportions]
                     for i, num in enumerate(num_per_leaf):
-                        if num > unlabelled_num_per_leaf[i]:
-                            num_per_leaf = unlabelled_num_per_leaf[i]
+                        if num >= unlabelled_num_per_leaf[i]:
+                            num_per_leaf[i] = unlabelled_num_per_leaf[i]
                             full_leaves.append(i)
                     for ind in full_leaves:
                         total_num_per_leaf[ind] = float('inf')
