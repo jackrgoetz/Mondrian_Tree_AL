@@ -601,6 +601,8 @@ class Mondrian_Tree:
 
         If we have too many points, we remove from the largest leaves till we are back in our 
         budget.
+
+        Note these are all heuristics, and can be changed and challenged.
         '''
         num_samples_total = copy.copy(num_samples_total)
 
@@ -665,6 +667,10 @@ class Mondrian_Tree:
 
                 if all([x==0 for x in num_per_leaf_fractions]):
                     num_per_leaf_fractions = [x - math.floor(x) for x in num_per_leaf_fractions]
+                    for i, num in enumerate(num_per_leaf):
+                        if num > unlabelled_num_per_leaf[i]:
+                            num_per_leaf = unlabelled_num_per_leaf[i]
+                            full_leaves.append(i)
                     for ind in full_leaves:
                         num_per_leaf_fractions[ind] = 0
 
@@ -681,6 +687,10 @@ class Mondrian_Tree:
 
                 if all([math.isinf(x) for x in total_num_per_leaf]):
                     total_num_per_leaf = [math.floor(x*num_samples_total) for x in self._al_proportions]
+                    for i, num in enumerate(num_per_leaf):
+                        if num > unlabelled_num_per_leaf[i]:
+                            num_per_leaf = unlabelled_num_per_leaf[i]
+                            full_leaves.append(i)
                     for ind in full_leaves:
                         total_num_per_leaf[ind] = float('inf')
 
