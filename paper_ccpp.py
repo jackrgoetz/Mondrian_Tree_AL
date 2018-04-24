@@ -1,4 +1,3 @@
-from data_sets.toy_data_var import toy_data_var
 from Mondrian_Tree import Mondrian_Tree
 from sklearn.tree import DecisionTreeRegressor
 
@@ -6,19 +5,11 @@ import numpy as np
 import warnings
 import matplotlib.pyplot as plt
 
-n_points = 20000
 n_finals = [200, 400, 600, 800, 1000, 1200, 1400,1600, 1800, 2000]
 # n_finals = [2000]
-p = 2
 
-data_seeds = [x * 11 for x in range(10)]
-tree_seeds = [x * 13 for x in range(10)]
-
-constant = 0
-low_std = 1
-high_std = 5
-
-high_area = [[0.75,1],[0.75,1]]
+data_seeds = [x * 11 for x in range(5)]
+tree_seeds = [x * 13 for x in range(5)]
 
 MT_al_MSE = np.zeros([len(n_finals)])
 MT_rn_MSE = np.zeros([len(n_finals)])
@@ -26,17 +17,35 @@ MT_oracle_MSE = np.zeros([len(n_finals)])
 BT_al_MSE = np.zeros([len(n_finals)])
 BT_rn_MSE = np.zeros([len(n_finals)])
 
+def scale_zero_one(col):
+
+    offset = min(col)
+    scale = max(col) - min(col)
+
+    col = (col - offset)/scale
+    return(col)
+
+ccpp_data = np.genfromtxt('data_sets/ccpp.csv', delimiter = ',')
+
+X = ccpp_data[:,:-1]
+for i in range(X.shape[1]):
+    X[:,i] = scale_zero_one(X[:,i])
+
+y = ccpp_data[:,-1]
+
+n,p = X.shape
+
+print(n, p)
+
 for n_final_ind, n_final in enumerate(n_finals):
 
     n_start = int(n_final/2)
 
     for data_seed in data_seeds:
 
-        X, y = toy_data_var(n=n_points,p=p,high_area=high_area,constant=constant,
-            low_std=low_std,high_std=high_std, set_seed=data_seed)
-
-        X = np.array(X)
-        y = np.array(y)
+        # plt.scatter(X[:,0], X[:,1], c=y)
+        # plt.show()
+        # sys.exit()
 
         np.random.seed(data_seed)
 
@@ -44,18 +53,25 @@ for n_final_ind, n_final in enumerate(n_finals):
 
         train_ind_al = cv_ind[:n_start]
         train_ind_rn = cv_ind[:n_final]
-        test_ind = cv_ind[n_start:]
-
-        X_train = X[train_ind_al,:]
-        # X_train_rn = X[train_ind_rn,:]
-        X_test = X[test_ind,:]
-
-        y_train_al = y[train_ind_al]
-        y_train_rn = y[train_ind_rn]
-        y_test = y[test_ind]
 
         X = X[cv_ind,:]
-        y = y[cv_ind] 
+        y = y[cv_ind]
+
+        X_test = X[cv_ind[n_start:],:]
+        y_test = y[cv_ind[n_start:]]
+
+        # test_ind = cv_ind[n_start:]
+
+        # X_train = X[train_ind_al,:]
+        # # X_train_rn = X[train_ind_rn,:]
+        # X_test = X[test_ind,:]
+
+        # y_train_al = y[train_ind_al]
+        # y_train_rn = y[train_ind_rn]
+        # y_test = y[test_ind]
+
+        # X = X[cv_ind,:]
+        # y = y[cv_ind] 
 
         for tree_seed in tree_seeds:
 
@@ -66,7 +82,7 @@ for n_final_ind, n_final in enumerate(n_finals):
             MT_al = Mondrian_Tree([[0,1]]*p)
             MT_al.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
             # print(MT_al._num_leaves)
-            MT_al.input_data(np.concatenate((X_train, X_test),axis=0), range(n_start), y_train_al)
+            MT_al.input_data(X, range(n_start), y[:n_start])
 
             MT_al.make_full_leaf_list()
             MT_al.make_full_leaf_var_list()
@@ -104,7 +120,7 @@ for n_final_ind, n_final in enumerate(n_finals):
             MT_rn = Mondrian_Tree([[0,1]]*p)
             MT_rn.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
             # print(MT._num_leaves)
-            MT_rn.input_data(np.concatenate((X_train, X_test),axis=0), range(n_final), y_train_rn)
+            MT_rn.input_data(X, range(n_final), y[:n_final])
             MT_rn.set_default_pred_global_mean()
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -114,7 +130,7 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             # print('Done MT_rn')
 
-            # MT_oracle
+            # MT_oracle - meaningless here
 
             MT_oracle_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test)**2)
 
@@ -140,12 +156,20 @@ MT_oracle_MSE = MT_oracle_MSE/(len(data_seeds) * len(tree_seeds))
 BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 
-plt.plot(n_finals, MT_al_MSE - MT_oracle_MSE, color = 'red')
-plt.plot(n_finals, MT_rn_MSE - MT_oracle_MSE, color = 'blue')
-plt.show()
+plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
+plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
 
-plt.clf()
+plt.title('CCPP experiment')
+plt.xlabel('Final number of labelled points')
+plt.ylabel('MSE')
+# plt.show()
 
-plt.plot(n_finals, BT_al_MSE, color = 'red')
-plt.plot(n_finals, BT_rn_MSE, color = 'blue')
+# plt.clf()
+
+plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
+    label = 'Breiman Tree - Active labelling')
+plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
+    label = 'Breiman Tree - Random labelling')
+plt.legend(loc="best")
+plt.savefig('graphs/ccpp.pdf')
 plt.show()

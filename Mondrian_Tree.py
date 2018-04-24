@@ -646,7 +646,7 @@ class Mondrian_Tree:
         # print(full_leaves)
 
         remaining_budget = num_samples_left - sum(num_per_leaf)
-        if abs(remaining_budget/num_samples_left) > 0.1:
+        if abs(remaining_budget/num_samples_left) > 0.2:
             warnings.warn('remaining_budget is = {} fraction of number of new samples. '
             'It may not be possible to get close to the optimal solution given the current locations '
             'of labelled data.'.format(round(abs(remaining_budget/num_samples_left),3))
