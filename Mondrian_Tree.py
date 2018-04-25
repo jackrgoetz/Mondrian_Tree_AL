@@ -341,8 +341,11 @@ class Mondrian_Tree:
         leaf = self._root.leaf_for_point(new_point)
         if label is None:
             leaf.unlabelled_index.append(point_index)
+            self._num_points += 1
         else:
             leaf.labelled_index.append(point_index)
+            self._num_points += 1
+            self._num_labelled += 1
 
         self._full_leaf_marginal_list_up_to_date = False
         if label is not None:

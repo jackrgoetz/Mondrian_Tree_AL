@@ -247,8 +247,9 @@ class test_Mondrian_Tree(unittest.TestCase):
             [None], self.mt1.labels)
         leaf = self.mt1._root.leaf_for_point([1]*self.d)
         self.assertEqual(leaf.unlabelled_index[-1],self.n_points)
+        self.assertEqual(len(self.mt1.points), self.mt1._num_points)
 
-    def test_add_data_point(self):
+    def test_add_data_point_labelled(self):
         lbda = 0.5
         seed = 1
         self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
@@ -260,7 +261,8 @@ class test_Mondrian_Tree(unittest.TestCase):
             [1], self.mt1.labels)
         leaf = self.mt1._root.leaf_for_point([1]*self.d)
         self.assertEqual(leaf.labelled_index[-1],self.n_points)
-
+        self.assertEqual(len(self.mt1.points), self.mt1._num_points)
+        self.assertEqual(self.n_labelled + 1, self.mt1._num_labelled)
 
     ###########################################
 
