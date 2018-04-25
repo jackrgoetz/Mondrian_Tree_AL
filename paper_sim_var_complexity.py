@@ -8,19 +8,21 @@ import matplotlib.pyplot as plt
 
 n_points = 20000
 n_test_points = 500
-n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
-# n_finals = [2000]
-p = 5
+n_finals = [200, 400, 600, 800, 1000, 1200, 1400,1600, 1800, 2000]
+p=2
 
-data_seeds = [x * 11 for x in range(5)]
-tree_seeds = [x * 13 for x in range(5)]
+# n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+# p = 5
+
+data_seeds = [x * 11 for x in range(10)]
+tree_seeds = [x * 13 for x in range(10)]
 
 std = 1
 low_freq = 0.1
 high_freq = 0.05
 
-low_mag = 1
-high_mag = 5
+low_mag = 5
+high_mag = 10
 
 high_area = [[0.5,1]]*p
 
@@ -32,7 +34,7 @@ BT_rn_MSE = np.zeros([len(n_finals)])
 
 for n_final_ind, n_final in enumerate(n_finals):
 
-    n_start = int(n_final/2)
+    n_start = int(n_final/4)
 
     for data_seed in data_seeds:
 
@@ -160,34 +162,54 @@ MT_oracle_MSE = MT_oracle_MSE/(len(data_seeds) * len(tree_seeds))
 BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 
-plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
-plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+f, axarr = plt.subplots(2, sharex=True)
 
-plt.title('Varying complexity simulation')
-plt.xlabel('Final number of labelled points')
-plt.ylabel('MSE')
+mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
+mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+axarr[0].set_title('Varying complexity simulation')
+# axarr[0].legend(loc='best')
+
+bt_al = axarr[1].plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
+    label = 'Breiman Tree - Active labelling')
+bt_rn = axarr[1].plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
+    label = 'Breiman Tree - Random labelling')
+# axarr[1].legend(loc='best')
+
+f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
+f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
+
+plt.tight_layout()
+plt.savefig('graphs/sim_var_complexity.pdf')
+plt.show()
+
+# plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
+# plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+
+# plt.title('Varying complexity simulation')
+# plt.xlabel('Final number of labelled points')
+# plt.ylabel('MSE')
+# # plt.show()
+
+# # plt.clf()
+
+# plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
+#     label = 'Breiman Tree - Active labelling')
+# plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
+#     label = 'Breiman Tree - Random labelling')
+# plt.legend(loc="best")
+# plt.savefig('graphs/sim_var_complexity_big.pdf')
 # plt.show()
 
 # plt.clf()
+# plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
+# plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+# plt.savefig('graphs/sim_var_complexity_big_MT.pdf')
+# plt.show()
 
-plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
-    label = 'Breiman Tree - Active labelling')
-plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
-    label = 'Breiman Tree - Random labelling')
-plt.legend(loc="best")
-plt.savefig('graphs/sim_var_complexity_big.pdf')
-plt.show()
-
-plt.clf()
-plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
-plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
-plt.savefig('graphs/sim_var_complexity_big_MT.pdf')
-plt.show()
-
-plt.clf()
-plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
-    label = 'Breiman Tree - Active labelling')
-plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
-    label = 'Breiman Tree - Random labelling')
-plt.savefig('graphs/sim_var_complexity_big_BT.pdf')
-plt.show()
+# plt.clf()
+# plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
+#     label = 'Breiman Tree - Active labelling')
+# plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
+#     label = 'Breiman Tree - Random labelling')
+# plt.savefig('graphs/sim_var_complexity_big_BT.pdf')
+# plt.show()

@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 n_finals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 # n_finals = [2000]
 
-data_seeds = [x * 11 for x in range(5)]
-tree_seeds = [x * 13 for x in range(5)]
+data_seeds = [x * 11 for x in range(10)]
+tree_seeds = [x * 13 for x in range(10)]
 
 MT_al_MSE = np.zeros([len(n_finals)])
 MT_rn_MSE = np.zeros([len(n_finals)])
@@ -80,7 +80,7 @@ for n_final_ind, n_final in enumerate(n_finals):
             # MT_al and labels for BT_al
 
             MT_al = Mondrian_Tree([[0,1]]*p)
-            MT_al.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
+            MT_al.update_life_time((n_final**(1/(2+p))-1), set_seed=tree_seed)
             # print(MT_al._num_leaves)
             MT_al.input_data(X, range(n_start), y[:n_start])
 
@@ -156,20 +156,40 @@ MT_oracle_MSE = MT_oracle_MSE/(len(data_seeds) * len(tree_seeds))
 BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 
-plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
-plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+f, axarr = plt.subplots(2, sharex=True)
 
-plt.title('Cl experiment')
-plt.xlabel('Final number of labelled points')
-plt.ylabel('MSE')
-# plt.show()
+mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
+mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+axarr[0].set_title('Cl simulation')
+# axarr[0].legend(loc='best')
 
-# plt.clf()
-
-plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
+bt_al = axarr[1].plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
     label = 'Breiman Tree - Active labelling')
-plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
+bt_rn = axarr[1].plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
     label = 'Breiman Tree - Random labelling')
-plt.legend(loc="best")
-plt.savefig('graphs/cl.pdf')
+# axarr[1].legend(loc='best')
+
+f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
+f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
+
+plt.tight_layout()
+plt.savefig('graphs/sim_cl.pdf')
 plt.show()
+
+# plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
+# plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+
+# plt.title('Cl experiment')
+# plt.xlabel('Final number of labelled points')
+# plt.ylabel('MSE')
+# # plt.show()
+
+# # plt.clf()
+
+# plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
+#     label = 'Breiman Tree - Active labelling')
+# plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
+#     label = 'Breiman Tree - Random labelling')
+# plt.legend(loc="best")
+# plt.savefig('graphs/cl.pdf')
+# plt.show()

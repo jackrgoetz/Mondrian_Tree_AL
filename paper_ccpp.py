@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 n_finals = [200, 400, 600, 800, 1000, 1200, 1400,1600, 1800, 2000]
 # n_finals = [2000]
 
-data_seeds = [x * 11 for x in range(5)]
-tree_seeds = [x * 13 for x in range(5)]
+data_seeds = [x * 11 for x in range(10)]
+tree_seeds = [x * 13 for x in range(10)]
 
 MT_al_MSE = np.zeros([len(n_finals)])
 MT_rn_MSE = np.zeros([len(n_finals)])
@@ -156,20 +156,40 @@ MT_oracle_MSE = MT_oracle_MSE/(len(data_seeds) * len(tree_seeds))
 BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 
-plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
-plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+f, axarr = plt.subplots(2, sharex=True)
 
-plt.title('CCPP experiment')
-plt.xlabel('Final number of labelled points')
-plt.ylabel('MSE')
-# plt.show()
+mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
+mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+axarr[0].set_title('CCPP simulation')
+# axarr[0].legend(loc='best')
 
-# plt.clf()
-
-plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
+bt_al = axarr[1].plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
     label = 'Breiman Tree - Active labelling')
-plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
+bt_rn = axarr[1].plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
     label = 'Breiman Tree - Random labelling')
-plt.legend(loc="best")
-plt.savefig('graphs/ccpp.pdf')
+# axarr[1].legend(loc='best')
+
+f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
+f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
+
+plt.tight_layout()
+plt.savefig('graphs/sim_ccpp.pdf')
 plt.show()
+
+# plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
+# plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
+
+# plt.title('CCPP experiment')
+# plt.xlabel('Final number of labelled points')
+# plt.ylabel('MSE')
+# # plt.show()
+
+# # plt.clf()
+
+# plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
+#     label = 'Breiman Tree - Active labelling')
+# plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
+#     label = 'Breiman Tree - Random labelling')
+# plt.legend(loc="best")
+# plt.savefig('graphs/ccpp.pdf')
+# plt.show()
