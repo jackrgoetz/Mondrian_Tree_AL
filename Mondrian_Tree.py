@@ -21,8 +21,8 @@ class Mondrian_Tree:
     '''
 
     def __init__(self, linear_dims):
-        self._max_linear_dims = linear_dims
-        self._root = LeafNode(linear_dims = self._max_linear_dims)
+        self._linear_dims = linear_dims
+        self._root = LeafNode(linear_dims = self._linear_dims)
         self._num_dimensions = len(linear_dims)
 
         self.points = None
