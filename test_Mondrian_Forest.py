@@ -119,6 +119,58 @@ class test_Mondrian_Forest(unittest.TestCase):
             self.assertEqual(leaf.labelled_index[-1],self.n_points)
             self.assertEqual(len(tree.points), tree._num_points)
 
+    ###########################################
+
+    # testing using the tree
+
+    def test_predict(self):
+        lbda = 0.5
+        seed = 1
+        self.mf.update_life_time(lbda, set_seeds=list(range(self.n_tree)))
+        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+
+        random.seed(seed)
+        new_point = []
+        for j in range(self.d):
+            new_point.append(random.random())
+        pred = self.mf.predict(new_point)
+        # print(pred)
+        tree_preds = []
+        for tree in self.mf.tree_list:
+            node = tree._root.leaf_for_point(new_point)
+            vals = [tree.labels[x] for x in node.labelled_index]
+            tree_preds.append(sum(vals)/len(vals))
+            # print(len(vals))
+        self.assertEqual(pred, sum(tree_preds)/len(tree_preds))
+
+    def test_predict_multi_values(self):
+        num_preds = 10
+        lbda = 0.5
+        seed = 1
+        self.mf.update_life_time(lbda, set_seeds=list(range(self.n_tree)))
+        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+
+        random.seed(seed)
+        new_points = []
+        for i in range(num_preds):
+            new_point = []
+            for j in range(self.d):
+                new_point.append(random.random())
+            new_points.append(new_point)
+        preds = self.mf.predict(new_points)
+
+        check_preds = []
+        for i in range(num_preds):
+
+            tree_preds = []
+            for tree in self.mf.tree_list:
+                node = tree._root.leaf_for_point(new_points[i])
+                vals = [tree.labels[x] for x in node.labelled_index]
+                tree_preds.append(sum(vals)/len(vals))
+
+            check_preds.append(sum(tree_preds)/len(tree_preds))
+        self.assertAlmostEqual(preds, check_preds)
+
 
 if __name__ == '__main__':
     unittest.main()

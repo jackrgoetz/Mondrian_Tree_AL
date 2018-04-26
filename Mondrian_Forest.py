@@ -14,12 +14,12 @@ class Mondrian_Forest:
     Main class for Mondrian Forest, a forest of Mondrian Trees
     '''
 
-    def __init__(self, linear_dims, n_trees):
+    def __init__(self, linear_dims, num_trees):
         self._linear_dims = linear_dims
         self._num_dimensions = len(linear_dims)
-        self._n_trees = n_trees
+        self._num_trees = num_trees
         self.tree_list = []
-        for _ in range(n_trees):
+        for _ in range(num_trees):
             self.tree_list.append(Mondrian_Tree(self._linear_dims))
 
         self.points = None
@@ -38,7 +38,7 @@ class Mondrian_Forest:
         '\n'
         'Number of data points = {}\n'
         'Number of labels = {}'.format(
-            self._num_dimensions, self._life_time, self._n_trees, self._num_points, 
+            self._num_dimensions, self._life_time, self._num_trees, self._num_points, 
             self._num_labelled))
 
     def _test_point(self, new_point):
@@ -69,6 +69,8 @@ class Mondrian_Forest:
         return new_point
 
     ###########################################
+
+    # Growing and adding data
 
     def update_life_time(self, new_life_time, set_seeds = None):
 
@@ -165,3 +167,25 @@ class Mondrian_Forest:
                 tree._full_leaf_mean_list_up_to_date = False
                 tree._full_leaf_var_list_up_to_date = False
 
+    ###########################################
+
+    # Using the forest
+
+    def predict(self, new_point):
+
+        tree_preds = []
+        for tree in self.tree_list:
+            tree_preds.append(tree.predict(new_point))
+
+        if type(tree_preds[0]) is not list:
+            return(sum(tree_preds)/self._num_trees)
+
+        else:
+            preds = []
+            for j in range(len(tree_preds[0])):
+                val = 0
+                for i in range(self._num_trees):
+                    val += tree_preds[i][j]
+                val = val / self._num_trees
+                preds.append(val)
+            return(preds)
