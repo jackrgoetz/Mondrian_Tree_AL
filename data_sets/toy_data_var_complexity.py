@@ -3,7 +3,8 @@
 import random
 import math
 
-def toy_data_var_complexity(n,p,high_area,std=1,low_freq=0.2,high_freq=0.05, low_mag=1, high_mag=2, set_seed=None):
+def toy_data_var_complexity(n,p,high_area,std=1,low_freq=0.2,high_freq=0.05, low_mag=1, high_mag=2, 
+    set_seed=None, marginal = 'uniform'):
 
     if set_seed is not None:
         random.seed(set_seed)
@@ -14,7 +15,10 @@ def toy_data_var_complexity(n,p,high_area,std=1,low_freq=0.2,high_freq=0.05, low
         point = []
         is_high_var = []
         for j in range(p):
-            val = random.random()
+            if marginal == 'normal':
+                val = random.gauss(0.5, 0.5/3)
+            else:
+                val = random.random()
             point.append(val)
             if val > high_area[j][0] and val < high_area[j][1]:
                 is_high_var.append(True)

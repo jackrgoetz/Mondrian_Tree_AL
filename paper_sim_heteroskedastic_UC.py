@@ -10,13 +10,14 @@ import copy
 n_points = 20000
 n_test_points = 500
 n_finals = [200, 400, 600, 800, 1000, 1200, 1400,1600, 1800, 2000]
-p = 2
+p = 10
+marginal = 'uniform'
 
 # n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 # p = 5
 
-data_seeds = [x * 11 for x in range(10)]
-tree_seeds = [x * 13 for x in range(10)]
+data_seeds = [x * 11 for x in range(30)]
+tree_seeds = [x * 13 for x in range(30)]
 
 constant = 0
 low_std = 1
@@ -40,10 +41,14 @@ for n_final_ind, n_final in enumerate(n_finals):
     for data_seed in data_seeds:
 
         X, y = toy_data_var(n=n_points,p=p,high_area=high_area,constant=constant,
-            low_std=low_std,high_std=high_std, set_seed=data_seed)
+            low_std=low_std,high_std=high_std, set_seed=data_seed, marginal=marginal)
 
         X = np.array(X)
         y = np.array(y)
+
+        # plt.scatter(X[:,0], X[:,1], c=y)
+        # plt.show()
+        # sys.exit()
 
         np.random.seed(data_seed)
 
@@ -56,7 +61,7 @@ for n_final_ind, n_final in enumerate(n_finals):
         y = y[cv_ind]
 
         X_test, y_test = toy_data_var(n=n_test_points,p=p,high_area=high_area,constant=constant,
-            low_std=low_std,high_std=high_std, set_seed=data_seed+1)
+            low_std=low_std,high_std=high_std, set_seed=data_seed+1,marginal=marginal)
 
         X_test = np.array(X_test)
         y_test = np.array(y_test)
@@ -216,7 +221,7 @@ f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
 f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
 
 plt.tight_layout()
-plt.savefig('graphs/sim_heteroskedastic_uc.pdf')
+plt.savefig('graphs/sim_heteroskedastic_uc_' + str(p) + '.pdf')
 plt.show()
 
 # plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
