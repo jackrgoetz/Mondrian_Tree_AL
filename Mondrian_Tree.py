@@ -230,7 +230,7 @@ class Mondrian_Tree:
 
             next_split_time = next_split_time + random.expovariate(self._root.subtree_linear_dim)
 
-    def input_data(self, all_data, labelled_indicies, labels):
+    def input_data(self, all_data, labelled_indicies, labels, copy_data=True):
         '''Puts in data for Mondrian Tree. 
         all_data should be a list of lists (or numpy array, points by row) with all data points, 
         labelled_indicies should be a list of the indicies for data points which we have the
@@ -240,9 +240,10 @@ class Mondrian_Tree:
         safely use numpy arrays. 
         '''
 
-        all_data = copy.deepcopy(all_data)
-        labelled_indicies = copy.deepcopy(labelled_indicies)
-        labels = copy.deepcopy(labels)
+        if copy_data:
+            all_data = copy.deepcopy(all_data)
+            labelled_indicies = copy.deepcopy(labelled_indicies)
+            labels = copy.deepcopy(labels)
 
         if len(all_data) < len(labelled_indicies):
             raise ValueError('Cannot have more labelled indicies than points')
@@ -744,7 +745,7 @@ class Mondrian_Tree:
 
         If the leaf has already had more samples than expected, gives probability 0. All 
         probabilities are normalized to account for rounding issues and passive oversampling of
-        leaves (NOTE: AD HOC SOLUTION TO PROBLEM. MAKE SURE IT MAKES SENSE)
+        leaves (NOTE: THIS ROUNDING IS AD HOC SOLUTION TO PROBLEM)
         '''
 
         num_samples_total = copy.copy(num_samples_total)

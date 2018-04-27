@@ -26,8 +26,13 @@ class Mondrian_Forest:
         self.labels = None
         self._num_points = 0
         self._num_labelled = 0
+        self._avg_num_leaves = 1
 
         self._life_time = 0
+
+        self._al_avg_weights_adjustment = None
+
+        self._verbose = False # useful for debugging or seeing how things work
 
     def __str__(self):
         # Add more as needed
@@ -74,11 +79,14 @@ class Mondrian_Forest:
 
     def update_life_time(self, new_life_time, set_seeds = None):
 
+        self._avg_num_leaves = 0
         for i, tree in enumerate(self.tree_list):
             if set_seeds is not None:
                 tree.update_life_time(new_life_time, set_seeds[i])
             else:
                 tree.update_life_time(new_life_time)
+            self._avg_num_leaves += tree._num_leaves
+        self._avg_num_leaves = self._avg_num_leaves / self._num_trees
 
     def input_data(self, all_data, labelled_indicies, labels):
 
@@ -124,11 +132,14 @@ class Mondrian_Forest:
         self.labels = temp
 
         for i, tree in enumerate(self.tree_list):
-            tree.input_data(all_data, labelled_indicies, labels)
+            tree.input_data(all_data, labelled_indicies, labels, copy_data = False)
             tree.points = self.points
             tree.labels = self.labels
             
     def label_point(self, index, value):
+
+        value = copy.copy(value)
+        index = copy.copy(index)
         self._num_labelled += 1
         for tree in self.tree_list:
             tree.label_point(index, value)
@@ -175,6 +186,7 @@ class Mondrian_Forest:
 
         tree_preds = []
         for tree in self.tree_list:
+            tree.set_default_pred_global_mean()
             tree_preds.append(tree.predict(new_point))
 
         if type(tree_preds[0]) is not list:
@@ -189,3 +201,30 @@ class Mondrian_Forest:
                 val = val / self._num_trees
                 preds.append(val)
             return(preds)
+
+    ###########################################
+
+    # Active Learning methods: methods for doing active learning as described in <paper>. all
+    # methods here will start with al_ so you know they're active learning related.
+
+    def al_average_point_probabilities_adjustment(self, num_samples_total):
+
+        weights_list = []
+        for tree in self.tree_list:
+            tree.al_set_default_var_global_var()
+            tree.al_calculate_leaf_proportions()
+            tree.al_calculate_point_probabilities_adjustment(num_samples_total)
+            weights_list.append(tree._al_point_weights_adjustment)
+
+        avg_weights = [0]*self._num_points
+        for i in range(self._num_points):
+            for j in range(self._num_trees):
+                val = weights_list[j][i]
+                if val is not None:
+                    avg_weights[i] += val
+                
+        avg_weights = [x/self._num_trees for x in avg_weights]
+        self._al_avg_weights_adjustment = avg_weights
+
+
+

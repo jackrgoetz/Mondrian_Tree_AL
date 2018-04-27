@@ -171,6 +171,18 @@ class test_Mondrian_Forest(unittest.TestCase):
             check_preds.append(sum(tree_preds)/len(tree_preds))
         self.assertAlmostEqual(preds, check_preds)
 
+    ###########################################
+
+    # Active learning methods
+
+    def test_al_average_point_probabilities_adjustment(self):
+        lbda = 0.5
+        self.mf.update_life_time(lbda, set_seeds=list(range(self.n_tree)))
+        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mf.al_average_point_probabilities_adjustment(10)
+        self.assertEqual(sum(self.mf._al_avg_weights_adjustment),1)
+
+
 
 if __name__ == '__main__':
     unittest.main()
