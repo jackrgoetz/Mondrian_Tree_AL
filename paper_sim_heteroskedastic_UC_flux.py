@@ -4,11 +4,13 @@ from sklearn.tree import DecisionTreeRegressor
 
 import numpy as np
 import warnings
+import matplotlib
+matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import copy
 
 n_points = 40000
-n_test_points = 500
+n_test_points = 5000
 n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 p = 10
 marginal = 'uniform'
@@ -87,9 +89,9 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             MT_al = Mondrian_Tree([[0,1]]*p)
             MT_al.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
-            # print(MT_al._num_leaves)
-            MT_al.input_data(X, range(n_start), y[:n_start])
+            MT_rn = copy.deepcopy(MT_al)
 
+            MT_al.input_data(X, range(n_start), y[:n_start])
             MT_al.make_full_leaf_list()
             MT_al.make_full_leaf_var_list()
             MT_al.al_set_default_var_global_var()
@@ -125,8 +127,8 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             # MT_rn
 
-            MT_rn = Mondrian_Tree([[0,1]]*p)
-            MT_rn.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
+            # MT_rn = Mondrian_Tree([[0,1]]*p)
+            # MT_rn.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
             # print(MT._num_leaves)
             MT_rn.input_data(X, range(n_final), y[:n_final])
             MT_rn.set_default_pred_global_mean()
@@ -171,7 +173,7 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             # BT_al
 
-            BT_al = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_al._num_leaves)
+            BT_al = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_al._num_leaves+1)
             BT_al.fit(X[list(range(n_start)) + new_labelled_points,:], y[list(range(n_start)) + new_labelled_points])
             BT_al_preds = BT_al.predict(X_test)
             BT_al_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - BT_al_preds)**2)
@@ -179,15 +181,15 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             # BT_rn
 
-            BT_rn = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_rn._num_leaves)
+            BT_rn = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_rn._num_leaves+1)
             BT_rn.fit(X[list(range(n_final)),:], y[list(range(n_final))])
             BT_rn_preds = BT_rn.predict(X_test)
             BT_rn_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - BT_rn_preds)**2)
             # print('Done BT_rn')
 
             # BT_uc
-            BT_uc = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_uc._num_leaves)
-            BT_uc.fit(X[list(range(n_start)) + new_labelled_points_uc,:], y[list(range(n_start)) + new_labelled_points])
+            BT_uc = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_uc._num_leaves+1)
+            BT_uc.fit(X[list(range(n_start)) + new_labelled_points_uc,:], y[list(range(n_start)) + new_labelled_points_uc])
             BT_uc_preds = BT_uc.predict(X_test)
             BT_uc_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - BT_uc_preds)**2)
 
@@ -199,6 +201,12 @@ MT_uc_MSE = MT_uc_MSE/(len(data_seeds) * len(tree_seeds))
 BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 BT_uc_MSE = BT_uc_MSE/(len(data_seeds) * len(tree_seeds))
+
+np.savez('graphs/sim_heteroskedastic_uc_' + str(p) + '_' + 
+    str(len(data_seeds) * len(tree_seeds)) + '.npz', 
+    MT_al_MSE=MT_al_MSE, MT_rn_MSE=MT_rn_MSE, MT_oracle_MSE=MT_oracle_MSE, 
+    MT_uc_MSE=MT_uc_MSE, BT_uc_MSE=BT_uc_MSE,
+    BT_al_MSE=BT_al_MSE, BT_rn_MSE=BT_rn_MSE)
 
 f, axarr = plt.subplots(2, sharex=True)
 
@@ -223,22 +231,3 @@ f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
 plt.tight_layout()
 plt.savefig('graphs/sim_heteroskedastic_uc_' + str(p) + '_' + 
     str(len(data_seeds) * len(tree_seeds)) + '.pdf')
-plt.show()
-
-# plt.plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active labelling')
-# plt.plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random labelling')
-
-# plt.title('Heteroskedastic simulation')
-# plt.xlabel('Final number of labelled points')
-# plt.ylabel('MSE')
-# # plt.show()
-
-# # plt.clf()
-
-# plt.plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
-#     label = 'Breiman Tree - Active labelling')
-# plt.plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
-#     label = 'Breiman Tree - Random labelling')
-# plt.legend(loc="best")
-# plt.savefig('graphs/sim_heteroskedastic.pdf')
-# plt.show()

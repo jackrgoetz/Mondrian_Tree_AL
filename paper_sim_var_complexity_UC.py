@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 import copy
 import math
 
-n_points = 20000
+n_points = 40000
 n_test_points = 500
-n_finals = [200, 400, 600, 800, 1000, 1200, 1400,1600, 1800, 2000, 2500, 3000]
+n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 p = 10
 
 # n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]

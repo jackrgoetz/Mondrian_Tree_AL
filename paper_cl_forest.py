@@ -6,7 +6,7 @@ import warnings
 import matplotlib.pyplot as plt
 
 n_finals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-n_tree = 50
+n_tree = 2
 # n_finals = [2000]
 
 data_seeds = [x * 11 for x in range(5)]

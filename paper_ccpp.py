@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 n_finals = [200, 400, 600, 800, 1000, 1200, 1400,1600, 1800, 2000]
 # n_finals = [2000]
 
-data_seeds = [x * 11 for x in range(10)]
-tree_seeds = [x * 13 for x in range(10)]
+data_seeds = [x * 11 for x in range(1)]
+tree_seeds = [x * 13 for x in range(1)]
 
 MT_al_MSE = np.zeros([len(n_finals)])
 MT_rn_MSE = np.zeros([len(n_finals)])
@@ -155,6 +155,12 @@ MT_rn_MSE = MT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 MT_oracle_MSE = MT_oracle_MSE/(len(data_seeds) * len(tree_seeds))
 BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
+
+np.savez('graphs/sim_cl_uc_' + 
+    str(len(data_seeds) * len(tree_seeds)) + '.npz', 
+    MT_al_MSE=MT_al_MSE, MT_rn_MSE=MT_rn_MSE, MT_oracle_MSE=MT_oracle_MSE, 
+    MT_uc_MSE=MT_uc_MSE, BT_uc_MSE=BT_uc_MSE,
+    BT_al_MSE=BT_al_MSE, BT_rn_MSE=BT_rn_MSE)
 
 f, axarr = plt.subplots(2, sharex=True)
 

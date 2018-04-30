@@ -1,4 +1,4 @@
-#PBS -N Mondrian_Tree_ccpp
+#PBS -N Mondrian_Tree_var_complexity
 #PBS -M jrgoetz@umich.edu
 #PBS -m abe
 #PBS -A tewaria_fluxm
@@ -21,4 +21,4 @@ if [ -d "$PBS_O_WORKDIR" ]; then
     echo "Running from $PBS_O_WORKDIR"
 fi
 
-python paper_ccpp_UC_flux.py
+python paper_sim_var_complexity_UC_flux.py
