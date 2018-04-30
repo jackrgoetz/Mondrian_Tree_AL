@@ -25,7 +25,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.n_labelled = 20
         random.seed(123)
         self.labels = [random.random() for i in range(self.n_labelled)]
-        self.labelled_indicies = range(self.n_labelled)
+        self.labelled_indices = range(self.n_labelled)
         self.data = []
         random.seed(1)
         for i in range(self.n_points):
@@ -102,7 +102,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     def test_input_data(self):
         lbda = 0.5
         self.mt1.update_life_time(lbda, set_seed=100)
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
 
         self.assertEqual(self.mt1._num_points,self.n_points)
         self.assertEqual(self.mt1._num_labelled,self.n_labelled)
@@ -132,7 +132,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.mt1.update_life_time(lbda, set_seed=100)
         # print(self.mt1._num_points)
 
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.update_life_time(lbda2, set_seed=100)
         # print(self.mt1._num_points)
 
@@ -161,7 +161,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         np_data = np.array(self.data)
         # print(np_data)
         np_labels = np.array(self.labels)
-        self.mt1.input_data(np_data, self.labelled_indicies, np_labels)
+        self.mt1.input_data(np_data, self.labelled_indices, np_labels)
 
         self.assertEqual(self.mt1._num_points,self.n_points)
         self.assertEqual(self.mt1._num_labelled,self.n_labelled)
@@ -188,7 +188,7 @@ class test_Mondrian_Tree(unittest.TestCase):
 
     def test_label_point_root(self):
         val = 1
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.label_point(self.n_labelled, val)
         self.assertEqual(self.mt1.labels[self.n_labelled],val)
         self.assertEqual(self.mt1._num_labelled, self.n_labelled + 1)
@@ -200,7 +200,7 @@ class test_Mondrian_Tree(unittest.TestCase):
             self.mt1.label_point(1,1)
 
     def test_label_point_too_big(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         with self.assertRaises(ValueError):
             self.mt1.label_point(self.n_points+1,1)
 
@@ -208,7 +208,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         val = 1
         lbda = 0.5
         seed = 1
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.update_life_time(lbda, set_seed=seed)
         self.mt1.label_point(self.n_labelled, val)
         self.assertEqual(self.mt1.labels[self.n_labelled],val)
@@ -238,7 +238,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     def test_add_data_point(self):
         lbda = 0.5
         seed = 1
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.update_life_time(lbda, set_seed=seed)
 
         self.mt1.add_data_point([1]*self.d)
@@ -252,7 +252,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     def test_add_data_point_labelled(self):
         lbda = 0.5
         seed = 1
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.update_life_time(lbda, set_seed=seed)
 
         self.mt1.add_data_point([1]*self.d,1)
@@ -284,7 +284,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     # Testing calculating leaf variances
 
     def test_make_full_leaf_var_list_root(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.make_full_leaf_list()
         self.mt1.make_full_leaf_var_list()
         self.assertEqual(utils.unbiased_var(self.labels), self.mt1._full_leaf_var_list[0])
@@ -298,7 +298,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         self.mt1.update_life_time(lbda, set_seed=100)
 
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.make_full_leaf_list()
         self.mt1.make_full_leaf_var_list()
 
@@ -316,7 +316,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     # Testing calculating leaf mean
 
     def test_make_full_leaf_mean_list_root(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.make_full_leaf_list()
         self.mt1.make_full_leaf_mean_list()
         self.assertEqual(sum(self.labels)/self.n_labelled, self.mt1._full_leaf_mean_list[0])
@@ -330,7 +330,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         self.mt1.update_life_time(lbda, set_seed=100)
 
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.make_full_leaf_list()
         self.mt1.make_full_leaf_mean_list()
 
@@ -347,7 +347,7 @@ class test_Mondrian_Tree(unittest.TestCase):
     # Testing calculating leaf marginal probabilities
 
     def test_make_full_leaf_marginal_list_root(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.make_full_leaf_list()
         self.mt1.make_full_leaf_marginal_list()
         self.assertEqual(1, self.mt1._full_leaf_marginal_list[0])
@@ -361,7 +361,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         self.mt1.update_life_time(lbda, set_seed=100)
 
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.make_full_leaf_list()
         self.mt1.make_full_leaf_marginal_list()
 
@@ -400,7 +400,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=100)
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
 
         random.seed(seed)
         new_point = []
@@ -419,7 +419,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=100)
         self.mt1.make_full_leaf_list()
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
 
         random.seed(seed)
         new_point = []
@@ -438,7 +438,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=100)
         self.mt1.make_full_leaf_list()
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
 
         random.seed(seed)
         new_point = []
@@ -458,7 +458,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=100)
         self.mt1.make_full_leaf_list()
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
 
         random.seed(seed)
         new_points = []
@@ -484,7 +484,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=100)
         self.mt1.make_full_leaf_list()
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
 
         random.seed(seed)
         new_point = []
@@ -500,7 +500,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=100)
         self.mt1.make_full_leaf_list()
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
 
         random.seed(seed)
         new_point = []
@@ -516,7 +516,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=100)
         self.mt1.make_full_leaf_list()
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
 
         random.seed(seed)
         new_point = []
@@ -608,7 +608,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=seed)
         self.mt1.make_full_leaf_list()
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.set_default_pred_global_mean()
         self.assertEqual(self.mt1.prediction_default_value, sum(self.labels)/self.n_labelled)
 
@@ -626,7 +626,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=seed)
         self.mt1.make_full_leaf_list()
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_set_default_var_global_var()
         self.assertEqual(self.mt1.al_default_var, utils.unbiased_var(self.labels))
 
@@ -648,7 +648,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.assertEqual(self.mt1._al_proportions, [1/self.mt1._num_leaves]*self.mt1._num_leaves)
 
     def test_al_calculate_leaf_proportions_root(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         self.assertEqual(self.mt1._al_proportions, [1])
 
@@ -656,7 +656,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=seed)
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         temp_prop_list = []
         for i, node in enumerate(self.mt1._full_leaf_list):
@@ -684,23 +684,23 @@ class test_Mondrian_Tree(unittest.TestCase):
             self.mt1.al_calculate_leaf_number_new_labels(1)
 
     def test_al_calculate_leaf_number_new_labels_too_many_labelled(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         with self.assertRaises(ValueError):
             self.mt1.al_calculate_leaf_number_new_labels(1)
 
     def test_al_calculate_leaf_number_new_labels_too_few_points(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         with self.assertRaises(ValueError):
             self.mt1.al_calculate_leaf_number_new_labels(101)
 
     def test_al_calculate_leaf_number_new_labels_bad_round_by(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         with self.assertRaises(ValueError):
             self.mt1.al_calculate_leaf_number_new_labels(21,round_by = 'bad')
 
     def test_al_calculate_leaf_number_new_labels_root(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         self.mt1.al_calculate_leaf_number_new_labels(21)
         self.assertEqual(self.mt1._al_leaf_number_new_labels,[1])
@@ -709,7 +709,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=seed)
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         with self.assertWarns(UserWarning):
             self.mt1.al_calculate_leaf_number_new_labels(21)
@@ -725,7 +725,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=seed)
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         self.mt1.al_calculate_leaf_number_new_labels(40)
         # print(self.mt1._al_leaf_number_new_labels)
@@ -748,7 +748,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.assertEqual(self.mt1._al_point_weights_proportional,[])
 
     def test_al_calculate_point_probabilities_proportions_root(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         self.mt1.al_calculate_point_probabilities_proportions()
         self.assertEqual(self.mt1._al_point_weights_proportional,
@@ -759,7 +759,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=seed)
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         self.mt1.al_calculate_point_probabilities_proportions()
         for i, node in enumerate(self.mt1._full_leaf_list):
@@ -776,7 +776,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         self.assertEqual(self.mt1._al_point_weights_adjustment,[])
 
     def test_al_calculate_point_probabilities_adjustment_root(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         self.mt1.al_calculate_point_probabilities_adjustment(21)
         for val in self.mt1._al_point_weights_adjustment:
@@ -790,7 +790,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         lbda = 0.5
         seed = 1
         self.mt1.update_life_time(lbda, set_seed=seed)
-        self.mt1.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mt1.input_data(self.data, self.labelled_indices, self.labels)
         self.mt1.al_calculate_leaf_proportions()
         self.mt1.al_calculate_point_probabilities_adjustment(21)
         self.assertAlmostEqual(sum([x for x in self.mt1._al_point_weights_adjustment if x]),1)
@@ -804,12 +804,12 @@ class test_Mondrian_Tree(unittest.TestCase):
     # Checking reasonable performance of tree
 
     def test_constant_value_performance_root(self):
-        self.mt1.input_data(self.data, self.labelled_indicies, [1]*self.n_labelled)
+        self.mt1.input_data(self.data, self.labelled_indices, [1]*self.n_labelled)
         self.assertEqual(self.mt1.predict([0.5]*self.d),1)
 
     def test_constant_value_performance(self):
         seed = 1
-        self.mt1.input_data(self.data, self.labelled_indicies, [1]*self.n_labelled)
+        self.mt1.input_data(self.data, self.labelled_indices, [1]*self.n_labelled)
         self.mt1.update_life_time(0.5,set_seed=seed)
         self.assertEqual(self.mt1.predict([0.5]*self.d),1)
 
@@ -818,7 +818,7 @@ class test_Mondrian_Tree(unittest.TestCase):
         labs = []
         for i in self.data[:self.n_labelled]:
             labs.append(sum(i))
-        self.mt1.input_data(self.data, self.labelled_indicies, labs)
+        self.mt1.input_data(self.data, self.labelled_indices, labs)
         self.mt1.update_life_time(0.5,set_seed=seed)
         self.mt1.make_full_leaf_list()
         # for i, node  in enumerate(self.mt1._full_leaf_list):
@@ -845,7 +845,7 @@ class test_Mondrian_Tree(unittest.TestCase):
             val = sum(i) + random.normalvariate(0,std)
             # print(sum(i),val)
             labs.append(val)
-        self.mt1.input_data(self.data, self.labelled_indicies, labs)
+        self.mt1.input_data(self.data, self.labelled_indices, labs)
         self.mt1.update_life_time(0.5,set_seed=seed)
         self.mt1.make_full_leaf_list()
         # for i, node  in enumerate(self.mt1._full_leaf_list):

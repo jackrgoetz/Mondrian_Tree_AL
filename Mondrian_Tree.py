@@ -230,10 +230,10 @@ class Mondrian_Tree:
 
             next_split_time = next_split_time + random.expovariate(self._root.subtree_linear_dim)
 
-    def input_data(self, all_data, labelled_indicies, labels, copy_data=True):
+    def input_data(self, all_data, labelled_indices, labels, copy_data=True):
         '''Puts in data for Mondrian Tree. 
         all_data should be a list of lists (or numpy array, points by row) with all data points, 
-        labelled_indicies should be a list of the indicies for data points which we have the
+        labelled_indices should be a list of the indicies for data points which we have the
         labels for, and labels should be an equal length list of those points labels.
 
         Should work with inputting things as numpy arrays, but this is the only place you can 
@@ -242,13 +242,13 @@ class Mondrian_Tree:
 
         if copy_data:
             all_data = copy.deepcopy(all_data)
-            labelled_indicies = copy.deepcopy(labelled_indicies)
+            labelled_indices = copy.deepcopy(labelled_indices)
             labels = copy.deepcopy(labels)
 
-        if len(all_data) < len(labelled_indicies):
+        if len(all_data) < len(labelled_indices):
             raise ValueError('Cannot have more labelled indicies than points')
 
-        if len(labelled_indicies) != len(labels):
+        if len(labelled_indices) != len(labels):
             raise ValueError('Labelled indicies list and labels list must be same length')
 
         for point in all_data:
@@ -261,10 +261,10 @@ class Mondrian_Tree:
                 print('Converting all_data to list of lists internally')
             all_data = all_data.tolist()
 
-        if str(type(labelled_indicies)) == "<class 'numpy.ndarray'>":
+        if str(type(labelled_indices)) == "<class 'numpy.ndarray'>":
             if self._verbose:
-                print('Converting labelled_indicies to list internally')
-            labelled_indicies = labelled_indicies.tolist()
+                print('Converting labelled_indices to list internally')
+            labelled_indices = labelled_indices.tolist()
 
         if str(type(labels)) == "<class 'numpy.ndarray'>":
             if self._verbose:
@@ -278,23 +278,23 @@ class Mondrian_Tree:
         # Making a label list, with None in places where we don't have the label
 
         temp = [None] * self._num_points
-        for i,ind in enumerate(labelled_indicies):
+        for i,ind in enumerate(labelled_indices):
             temp[ind] = labels[i]
         self.labels = temp
-        unlabelled_indicies = [x for x in range(self._num_points) if x not in labelled_indicies]
+        unlabelled_indices = [x for x in range(self._num_points) if x not in labelled_indices]
 
         # Placing each point into the correct leaf
 
         if self._root.is_leaf():
-            self._root.labelled_index = list(labelled_indicies)
-            self._root.unlabelled_index = unlabelled_indicies
+            self._root.labelled_index = list(labelled_indices)
+            self._root.unlabelled_index = unlabelled_indices
 
         else:
-            for i in labelled_indicies:
+            for i in labelled_indices:
                 curr_leaf = self._root.leaf_for_point(self.points[i])
                 curr_leaf.labelled_index.append(i)
 
-            for i in unlabelled_indicies:
+            for i in unlabelled_indices:
                 curr_leaf = self._root.leaf_for_point(self.points[i])
                 curr_leaf.unlabelled_index.append(i)
 

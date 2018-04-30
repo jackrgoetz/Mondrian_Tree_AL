@@ -22,7 +22,7 @@ class test_Mondrian_Forest(unittest.TestCase):
         self.n_labelled = 20
         random.seed(123)
         self.labels = [random.random() for i in range(self.n_labelled)]
-        self.labelled_indicies = range(self.n_labelled)
+        self.labelled_indices = range(self.n_labelled)
         self.data = []
         random.seed(1)
         for i in range(self.n_points):
@@ -53,19 +53,19 @@ class test_Mondrian_Forest(unittest.TestCase):
     # testing adding / updating data
 
     def test_input_data(self):
-        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mf.input_data(self.data, self.labelled_indices, self.labels)
         for tree in self.mf.tree_list:
             self.assertTrue(self.mf.points is tree.points)
             self.assertEqual(self.mf._num_points, tree._num_points)
 
     def test_input_data_grow(self):
         lbda = 1
-        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mf.input_data(self.data, self.labelled_indices, self.labels)
         self.mf.update_life_time(lbda, set_seeds = list(range(self.n_tree)))
         for i, tree in enumerate(self.mf.tree_list):
             test_tree = Mondrian_Tree(self.linear_dims)
             test_tree.update_life_time(lbda, set_seed=i)
-            test_tree.input_data(self.data, self.labelled_indicies, self.labels)
+            test_tree.input_data(self.data, self.labelled_indices, self.labels)
             self.assertEqual(test_tree._num_leaves, tree._num_leaves)
             tree.make_full_leaf_list()
             test_tree.make_full_leaf_list()
@@ -81,7 +81,7 @@ class test_Mondrian_Forest(unittest.TestCase):
 
     def test_label_point(self):
         val = 2
-        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mf.input_data(self.data, self.labelled_indices, self.labels)
         self.mf.label_point(self.n_labelled, val)
         self.assertEqual(self.mf.labels[self.n_labelled],val)
         self.assertEqual(self.mf._num_labelled, self.n_labelled + 1)
@@ -91,7 +91,7 @@ class test_Mondrian_Forest(unittest.TestCase):
 
     def test_add_data_point(self):
         lbda = 1
-        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mf.input_data(self.data, self.labelled_indices, self.labels)
         self.mf.update_life_time(lbda, set_seeds = list(range(self.n_tree)))
         self.mf.add_data_point([1]*self.d)
         self.assertEqual(self.mf._num_points, self.n_points + 1)
@@ -106,7 +106,7 @@ class test_Mondrian_Forest(unittest.TestCase):
     def test_add_data_point_labelled(self):
         lbda = 1
         val = 1
-        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mf.input_data(self.data, self.labelled_indices, self.labels)
         self.mf.update_life_time(lbda, set_seeds = list(range(self.n_tree)))
         self.mf.add_data_point([1]*self.d, val)
         self.assertEqual(self.mf._num_points, self.n_points + 1)
@@ -127,7 +127,7 @@ class test_Mondrian_Forest(unittest.TestCase):
         lbda = 0.5
         seed = 1
         self.mf.update_life_time(lbda, set_seeds=list(range(self.n_tree)))
-        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mf.input_data(self.data, self.labelled_indices, self.labels)
 
         random.seed(seed)
         new_point = []
@@ -148,7 +148,7 @@ class test_Mondrian_Forest(unittest.TestCase):
         lbda = 0.5
         seed = 1
         self.mf.update_life_time(lbda, set_seeds=list(range(self.n_tree)))
-        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mf.input_data(self.data, self.labelled_indices, self.labels)
 
         random.seed(seed)
         new_points = []
@@ -178,7 +178,7 @@ class test_Mondrian_Forest(unittest.TestCase):
     def test_al_average_point_probabilities_adjustment(self):
         lbda = 0.5
         self.mf.update_life_time(lbda, set_seeds=list(range(self.n_tree)))
-        self.mf.input_data(self.data, self.labelled_indicies, self.labels)
+        self.mf.input_data(self.data, self.labelled_indices, self.labels)
         self.mf.al_average_point_probabilities_adjustment(10)
         self.assertEqual(sum(self.mf._al_avg_weights_adjustment),1)
 

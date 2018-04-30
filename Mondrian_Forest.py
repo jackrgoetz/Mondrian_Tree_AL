@@ -88,17 +88,17 @@ class Mondrian_Forest:
             self._avg_num_leaves += tree._num_leaves
         self._avg_num_leaves = self._avg_num_leaves / self._num_trees
 
-    def input_data(self, all_data, labelled_indicies, labels):
+    def input_data(self, all_data, labelled_indices, labels):
 
         all_data = copy.deepcopy(all_data)
-        labelled_indicies = copy.deepcopy(labelled_indicies)
+        labelled_indices = copy.deepcopy(labelled_indices)
         labels = copy.deepcopy(labels)
 
-        if len(all_data) < len(labelled_indicies):
-            raise ValueError('Cannot have more labelled indicies than points')
+        if len(all_data) < len(labelled_indices):
+            raise ValueError('Cannot have more labelled indices than points')
 
-        if len(labelled_indicies) != len(labels):
-            raise ValueError('Labelled indicies list and labels list must be same length')
+        if len(labelled_indices) != len(labels):
+            raise ValueError('Labelled indices list and labels list must be same length')
 
         for point in all_data:
             if len(point) != self._num_dimensions:
@@ -110,10 +110,10 @@ class Mondrian_Forest:
                 print('Converting all_data to list of lists internally')
             all_data = all_data.tolist()
 
-        if str(type(labelled_indicies)) == "<class 'numpy.ndarray'>":
+        if str(type(labelled_indices)) == "<class 'numpy.ndarray'>":
             if self._verbose:
-                print('Converting labelled_indicies to list internally')
-            labelled_indicies = labelled_indicies.tolist()
+                print('Converting labelled_indices to list internally')
+            labelled_indices = labelled_indices.tolist()
 
         if str(type(labels)) == "<class 'numpy.ndarray'>":
             if self._verbose:
@@ -127,12 +127,12 @@ class Mondrian_Forest:
         # Making a label list, with None in places where we don't have the label
 
         temp = [None] * self._num_points
-        for i,ind in enumerate(labelled_indicies):
+        for i,ind in enumerate(labelled_indices):
             temp[ind] = labels[i]
         self.labels = temp
 
         for i, tree in enumerate(self.tree_list):
-            tree.input_data(all_data, labelled_indicies, labels, copy_data = False)
+            tree.input_data(all_data, labelled_indices, labels, copy_data = False)
             tree.points = self.points
             tree.labels = self.labels
             
