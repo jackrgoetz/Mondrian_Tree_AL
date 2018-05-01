@@ -11,7 +11,7 @@ import copy
 
 n_points = 10000
 n_test_points = 5000
-n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000]
+n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 # n_finals = [100, 200]
 p = 10
 marginal = 'normal'
@@ -20,8 +20,8 @@ batch_size = 50
 # n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 # p = 5
 
-data_seeds = [x * 11 for x in range(10)]
-tree_seeds = [x * 13 for x in range(10)]
+data_seeds = [x * 11 for x in range(5)]
+tree_seeds = [x * 13 for x in range(5)]
 
 std = 1
 low_freq = 0.2
