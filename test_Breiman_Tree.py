@@ -57,7 +57,7 @@ class test_Breiman_Tree(unittest.TestCase):
             self.bt.label_point(self.n_labelled+i, random.random())
             self.bt.fit_tree()
             self.bt.calculate_leaf_statistics()
-            print(sorted(self.bt._leaf_var))
+            # print(sorted(self.bt._leaf_var))
 
     def test_leaf_statistics_marginal(self):
         n_reps = 20
@@ -66,5 +66,27 @@ class test_Breiman_Tree(unittest.TestCase):
             self.bt.label_point(self.n_labelled+i, random.random())
             self.bt.fit_tree()
             self.bt.calculate_leaf_statistics()
-            print(sorted(self.bt._leaf_marginal))
+            # print(sorted(self.bt._leaf_marginal))
+
+    def test_leaf_proportions(self):
+        n_reps = 20
+        self.bt.input_data(self.data, self.labelled_indices, self.labels)
+        for i in range(n_reps):
+            self.bt.label_point(self.n_labelled+i, random.random())
+            self.bt.fit_tree()
+            self.bt.calculate_leaf_statistics()
+            self.bt.al_calculate_leaf_proportions()
+
+    def test_pick_new_points(self):
+        n_reps = 20
+        self.bt.input_data(self.data, self.labelled_indices, self.labels)
+        new_point = self.n_labelled
+        for i in range(n_reps):
+            self.bt.label_point(new_point, random.random())
+            self.bt.fit_tree()
+            self.bt.calculate_leaf_statistics()
+            self.bt.al_calculate_leaf_proportions()
+            new_point = self.bt.pick_new_points()[0]
+            print(new_point)
+
         

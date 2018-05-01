@@ -39,6 +39,7 @@ class Breiman_Tree:
         self._al_proportions =[]
 
         self._leaf_statistics_up_to_date = False
+        self._leaf_proportions_up_to_date = False
 
         self._verbose = False
 
@@ -101,6 +102,10 @@ class Breiman_Tree:
 
         self.labels[index] = value
         self.labelled_indices.append(index)
+        self._num_labelled += 1
+
+    def predict(self, new_points):
+        return(self.tree.predict(new_points))
 
     def calculate_leaf_statistics(self):
         temp = Counter(self._leaf_indices)
@@ -111,5 +116,40 @@ class Breiman_Tree:
             temp_ind = [i for i,x in enumerate(self._leaf_indices) if x == key]
             temp_labels = [x for x in self.labels if x is not None]
             self._leaf_var.append(utils.unbiased_var(temp_labels))
+        self._leaf_statistics_up_to_date = True
 
     def al_calculate_leaf_proportions(self):
+        if not self._leaf_statistics_up_to_date:
+            self.calculate_leaf_statistics()
+        al_proportions = []
+        for i, val in enumerate(self._leaf_var):
+            al_proportions.append(np.sqrt(self._leaf_var[i] * self._leaf_marginal[i]))
+        al_proportions = np.array(al_proportions)/sum(al_proportions)
+        self._al_proportions = al_proportions
+        self._leaf_proportions_up_to_date = True
+
+    def pick_new_points(self, num_samples = 1):
+        if not self._leaf_proportions_up_to_date:
+            self.al_calculate_leaf_proportions()
+
+        temp = Counter(np.array(self._leaf_indices)[[x for x in range(self._num_points
+            ) if self.labels[x] is None]])
+        point_proportions = {}
+        for i,key in enumerate(np.unique(self._leaf_indices)):
+            point_proportions[key] = self._al_proportions[i] / max(1,temp[key]) 
+        temp_probs = np.array([point_proportions[key] for key in self._leaf_indices])
+        temp_probs[self.labelled_indices] = 0
+        temp_probs = temp_probs / sum(temp_probs)
+        # print(sum(temp_probs))
+        leaves_to_sample = np.random.choice(self._leaf_indices,num_samples, 
+            p=temp_probs, replace = False)
+        points_to_label = []
+        for leaf in leaves_to_sample:
+            possible_points = [x for i,x in enumerate(range(self._num_points)
+                ) if self._leaf_indices[i] ==leaf and self.labels[i] is None]
+            points_to_label.append(np.random.choice(possible_points))
+
+        return(points_to_label)
+
+
+
