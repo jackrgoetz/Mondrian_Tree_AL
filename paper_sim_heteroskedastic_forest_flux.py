@@ -1,3 +1,4 @@
+from data_sets.toy_data_var import toy_data_var
 from Mondrian_Forest import Mondrian_Forest
 from sklearn.ensemble import RandomForestRegressor
 
@@ -9,12 +10,22 @@ import matplotlib.pyplot as plt
 import copy
 import math
 
+n_points = 40000
+n_test_points = 5000
 n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
+p = 10
+marginal = 'uniform'
 n_tree = 2
 # n_finals = [2000]
 
 data_seeds = [x * 11 for x in range(1)]
 tree_seeds = [x * 13 for x in range(1)]
+
+constant = 0
+low_std = 1
+high_std = 5
+
+high_area = [[0.5,1]]*p
 
 MT_al_MSE = np.zeros([len(n_finals)])
 MT_rn_MSE = np.zeros([len(n_finals)])
@@ -23,26 +34,6 @@ MT_uc_MSE = np.zeros([len(n_finals)])
 BT_al_MSE = np.zeros([len(n_finals)])
 BT_rn_MSE = np.zeros([len(n_finals)])
 BT_uc_MSE = np.zeros([len(n_finals)])
-
-def scale_zero_one(col):
-
-    offset = min(col)
-    scale = max(col) - min(col)
-
-    col = (col - offset)/scale
-    return(col)
-
-ccpp_data = np.genfromtxt('data_sets/ccpp.csv', delimiter = ',')
-
-X = ccpp_data[:,:-1]
-for i in range(X.shape[1]):
-    X[:,i] = scale_zero_one(X[:,i])
-
-y = ccpp_data[:,-1]
-
-n,p = X.shape
-
-print(n, p)
 
 for n_final_ind, n_final in enumerate(n_finals):
 
@@ -54,6 +45,12 @@ for n_final_ind, n_final in enumerate(n_finals):
         # plt.show()
         # sys.exit()
 
+        X, y = toy_data_var(n=n_points,p=p,high_area=high_area,constant=constant,
+            low_std=low_std,high_std=high_std, set_seed=data_seed, marginal=marginal)
+
+        X = np.array(X)
+        y = np.array(y)
+
         np.random.seed(data_seed)
 
         cv_ind = np.random.permutation(range(X.shape[0]))
@@ -64,21 +61,11 @@ for n_final_ind, n_final in enumerate(n_finals):
         X = X[cv_ind,:]
         y = y[cv_ind]
 
-        X_test = X[cv_ind[n_start:],:]
-        y_test = y[cv_ind[n_start:]]
+        X_test, y_test = toy_data_var(n=n_test_points,p=p,high_area=high_area,constant=constant,
+            low_std=low_std,high_std=high_std, set_seed=data_seed+1,marginal=marginal)
 
-        # test_ind = cv_ind[n_start:]
-
-        # X_train = X[train_ind_al,:]
-        # # X_train_rn = X[train_ind_rn,:]
-        # X_test = X[test_ind,:]
-
-        # y_train_al = y[train_ind_al]
-        # y_train_rn = y[train_ind_rn]
-        # y_test = y[test_ind]
-
-        # X = X[cv_ind,:]
-        # y = y[cv_ind] 
+        X_test = np.array(X_test)
+        y_test = np.array(y_test)
 
         for tree_seed in tree_seeds:
 
@@ -113,9 +100,6 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             # MT_rn
 
-            # MT_rn = Mondrian_Tree([[0,1]]*p)
-            # MT_rn.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
-            # print(MT._num_leaves)
             MT_rn.input_data(X, range(n_final), y[:n_final])
 
             with warnings.catch_warnings():
@@ -198,7 +182,7 @@ BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 BT_uc_MSE = BT_uc_MSE/(len(data_seeds) * len(tree_seeds))
 
-np.savez('graphs/sim_ccpp_forest_' + 
+np.savez('graphs/sim_heteroskedastic_forest_' + 
     str(len(data_seeds) * len(tree_seeds)) + '.npz', 
     MT_al_MSE=MT_al_MSE, MT_rn_MSE=MT_rn_MSE, 
     MT_uc_MSE=MT_uc_MSE, BT_uc_MSE=BT_uc_MSE,
@@ -224,5 +208,5 @@ f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
 f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
 
 plt.tight_layout()
-plt.savefig('graphs/sim_ccpp_forest_' + 
+plt.savefig('graphs/sim_heteroskedastic_forest_' + 
     str(len(data_seeds) * len(tree_seeds)) + '.pdf')

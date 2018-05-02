@@ -127,9 +127,6 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             # MT_rn
 
-            # MT_rn = Mondrian_Tree([[0,1]]*p)
-            # MT_rn.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
-            # print(MT._num_leaves)
             MT_rn.input_data(X, range(n_final), y[:n_final])
             MT_rn.set_default_pred_global_mean()
             with warnings.catch_warnings():

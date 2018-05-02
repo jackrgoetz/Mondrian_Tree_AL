@@ -44,7 +44,7 @@ for n_final_ind, n_final in enumerate(n_finals):
 
         X, y, true_labels = toy_data_var_complexity(n=n_points,p=p,high_area=high_area,std=std,
             low_freq=low_freq,high_freq=high_freq, low_mag=low_mag, high_mag=high_mag, 
-            set_seed=data_seed, return_true_labels=True)
+            set_seed=data_seed, marginal=marginal, return_true_labels=True)
 
         X = np.array(X)
         y = np.array(y)

@@ -15,12 +15,13 @@ n_test_points = 5000
 n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 p = 10
 marginal = 'normal'
+useless_dims = 3
 
 # n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 # p = 5
 
-data_seeds = [x * 11 for x in range(5)]
-tree_seeds = [x * 13 for x in range(5)]
+data_seeds = [x * 11 for x in range(20)]
+tree_seeds = [x * 13 for x in range(20)]
 
 std = 1
 low_freq = 0.1
@@ -48,7 +49,7 @@ for n_final_ind, n_final in enumerate(n_finals):
 
         X, y, true_labels = toy_data_var_complexity(n=n_points,p=p,high_area=high_area,std=std,
             low_freq=low_freq,high_freq=high_freq, low_mag=low_mag, high_mag=high_mag, 
-            set_seed=data_seed, marginal=marginal, return_true_labels=True)
+            set_seed=data_seed, marginal=marginal, return_true_labels=True, useless_dims = useless_dims)
 
         X = np.array(X)
         y = np.array(y)
@@ -65,7 +66,7 @@ for n_final_ind, n_final in enumerate(n_finals):
 
         X_test, y_test = toy_data_var_complexity(n=n_points,p=p,high_area=high_area,std=std,
             low_freq=low_freq,high_freq=high_freq, low_mag=low_mag, high_mag=high_mag, 
-            set_seed=data_seed+1)
+            set_seed=data_seed+1, useless_dims = useless_dims)
 
         X_test = np.array(X_test)
         y_test = np.array(y_test)
@@ -143,6 +144,27 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             # print('Done MT_rn')
 
+            # MT_oracle
+
+            # true_labels = []
+            # for i in range(X.shape[0]):
+            #     point = X[i,:]
+            #     is_high_var = []
+            #     for j in range(p):
+            #         val = point[j]
+            #         if val > high_area[j][0] and val < high_area[j][1]:
+            #             is_high_var.append(True)
+            #         else:
+            #             is_high_var.append(False)
+
+            #     if all(is_high_var):
+            #         true_labels.append(high_mag*math.sin((2*math.pi)/(high_freq * p)*sum(point)))
+            #     else:
+            #         true_labels.append(low_mag*math.sin((2*math.pi)/(low_freq * p)*sum(point)))
+
+            # MT_oracle = Mondrian_Tree([[0,1]]*p)
+            # MT_oracle.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
+            # print(MT._num_leaves)
             MT_oracle.input_data(X, range(n_points), true_labels)
             MT_oracle.set_default_pred_global_mean()
             with warnings.catch_warnings():
@@ -207,7 +229,7 @@ BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 BT_uc_MSE = BT_uc_MSE/(len(data_seeds) * len(tree_seeds))
 
-np.savez('graphs/sim_var_complexity_uc_' + str(p) + '_' + 
+np.savez('graphs/sim_var_complexity_useless_dim_' + str(p) + '_' + 
     str(len(data_seeds) * len(tree_seeds)) + '.npz', 
     MT_al_MSE=MT_al_MSE, MT_rn_MSE=MT_rn_MSE, MT_oracle_MSE=MT_oracle_MSE, 
     MT_uc_MSE=MT_uc_MSE, BT_uc_MSE=BT_uc_MSE,
@@ -234,5 +256,5 @@ f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
 f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
 
 plt.tight_layout()
-plt.savefig('graphs/sim_var_complexity_uc_' + str(p) + '_' + 
+plt.savefig('graphs/sim_var_complexity_useless_dim_' + str(p) + '_' + 
     str(len(data_seeds) * len(tree_seeds)) + '.pdf')

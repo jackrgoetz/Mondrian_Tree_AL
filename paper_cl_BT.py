@@ -9,15 +9,15 @@ import matplotlib.pyplot as plt
 import copy
 
 # n_finals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-n_finals = [100, 200, 300, 400, 500, 600]
-batch_size = 2
+n_finals = [100, 200, 300, 400, 500]
+batch_size = 1
 min_samples_leaf = 5
 
 # n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 # p = 5
 
-data_seeds = [x * 11 for x in range(5)]
-tree_seeds = [x * 13 for x in range(5)]
+data_seeds = [x * 11 for x in range(10)]
+tree_seeds = [x * 13 for x in range(10)]
 
 BT_al_MSE = np.zeros([len(n_finals)])
 BT_rn_MSE = np.zeros([len(n_finals)])
@@ -110,7 +110,7 @@ BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 BT_uc_MSE = BT_uc_MSE/(len(data_seeds) * len(tree_seeds))
 
-np.savez('graphs/sim_cl_BT_' + str(p) + '_' + 
+np.savez('graphs/sim_cl_BT_' + str(min_samples_leaf) + '_' + 
     str(len(data_seeds) * len(tree_seeds)) + '.npz', 
     BT_uc_MSE=BT_uc_MSE,
     BT_al_MSE=BT_al_MSE, BT_rn_MSE=BT_rn_MSE)
@@ -136,5 +136,5 @@ f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
 f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
 
 plt.tight_layout()
-plt.savefig('graphs/sim_cl_BT_' + str(p) + '_' + 
+plt.savefig('graphs/sim_cl_BT_' + str(min_samples_leaf) + '_' + 
     str(len(data_seeds) * len(tree_seeds)) + '.pdf')

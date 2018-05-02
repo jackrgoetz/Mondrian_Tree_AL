@@ -206,18 +206,18 @@ np.savez('graphs/sim_cl_forest_' +
 
 f, axarr = plt.subplots(2, sharex=True)
 
-mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active sampling')
-mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random sampling')
-mt_uc = axarr[0].plot(n_finals, MT_uc_MSE, color = 'green', label = 'Mondrian Tree - Uncertainty sampling')
+mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Forest - Active sampling')
+mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Forest - Random sampling')
+mt_uc = axarr[0].plot(n_finals, MT_uc_MSE, color = 'green', label = 'Mondrian Forest - Uncertainty sampling')
 axarr[0].set_title('Cl experiment')
 axarr[0].legend(loc='best')
 
 bt_al = axarr[1].plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
-    label = 'Breiman Tree - Active sampling')
+    label = 'Random Forest - Active sampling')
 bt_rn = axarr[1].plot(n_finals, BT_rn_MSE, color = 'blue', linestyle = '--',
-    label = 'Breiman Tree - Random sampling')
+    label = 'Random Forest - Random sampling')
 bt_rn = axarr[1].plot(n_finals, BT_uc_MSE, color = 'green', linestyle = '--',
-    label = 'Breiman Tree - Uncertainty sampling')
+    label = 'Random Forest - Uncertainty sampling')
 axarr[1].legend(loc='best')
 
 f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
