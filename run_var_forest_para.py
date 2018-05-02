@@ -13,8 +13,8 @@ import math
 import itertools
 import time
 
-data_seeds = [x * 11 for x in range(2)]
-tree_seeds = [x * 13 for x in range(2)]
+data_seeds = [x * 11 for x in range(7)]
+tree_seeds = [x * 13 for x in range(7)]
 
 n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 
