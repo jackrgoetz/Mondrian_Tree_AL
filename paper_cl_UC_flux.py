@@ -11,8 +11,8 @@ import copy
 n_finals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 # n_finals = [2000]
 
-data_seeds = [x * 11 for x in range(1)]
-tree_seeds = [x * 13 for x in range(1)]
+data_seeds = [x * 11 for x in range(10)]
+tree_seeds = [x * 13 for x in range(10)]
 
 MT_al_MSE = np.zeros([len(n_finals)])
 MT_rn_MSE = np.zeros([len(n_finals)])
@@ -142,6 +142,7 @@ for n_final_ind, n_final in enumerate(n_finals):
             # MT_uc
 
             new_labelled_points_uc = []
+            MT_uc.al_set_default_var_global_var()
             MT_uc._al_proportions = [x / sum(MT_uc._full_leaf_var_list) for x in MT_uc._full_leaf_var_list]
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")

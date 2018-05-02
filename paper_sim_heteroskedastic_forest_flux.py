@@ -15,11 +15,11 @@ n_test_points = 5000
 n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 p = 10
 marginal = 'uniform'
-n_tree = 2
+n_tree = 10
 # n_finals = [2000]
 
-data_seeds = [x * 11 for x in range(1)]
-tree_seeds = [x * 13 for x in range(1)]
+data_seeds = [x * 11 for x in range(2)]
+tree_seeds = [x * 13 for x in range(2)]
 
 constant = 0
 low_std = 1
@@ -50,6 +50,8 @@ for n_final_ind, n_final in enumerate(n_finals):
 
         X = np.array(X)
         y = np.array(y)
+
+        n,p = X.shape
 
         np.random.seed(data_seed)
 
@@ -193,7 +195,7 @@ f, axarr = plt.subplots(2, sharex=True)
 mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Forest - Active sampling')
 mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Forest - Random sampling')
 mt_uc = axarr[0].plot(n_finals, MT_uc_MSE, color = 'green', label = 'Mondrian Forest - Uncertainty sampling')
-axarr[0].set_title('Cl experiment')
+axarr[0].set_title('Heteroskedastic experiment')
 axarr[0].legend(loc='best')
 
 bt_al = axarr[1].plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 

@@ -1,4 +1,4 @@
-#PBS -N Mondrian_Forest_cl
+#PBS -N Mondrian_Forest_het
 #PBS -M jrgoetz@umich.edu
 #PBS -m abe
 #PBS -A tewaria_fluxm
@@ -21,4 +21,4 @@ if [ -d "$PBS_O_WORKDIR" ]; then
     echo "Running from $PBS_O_WORKDIR"
 fi
 
-python paper_cl_forest_flux.py
+python paper_sim_heteroskedastic_forest_flux.py
