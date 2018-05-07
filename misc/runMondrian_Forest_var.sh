@@ -1,10 +1,10 @@
 #PBS -N Mondrian_Forest_var
 #PBS -M jrgoetz@umich.edu
 #PBS -m abe
-#PBS -A tewaria_fluxm
-#PBS -q fluxm
+#PBS -A stats_flux
+#PBS -q flux
 #PBS -l qos=flux
-#PBS -l nodes=1:ppn=1,walltime=120:00:00,pmem=8gb
+#PBS -l nodes=1:ppn=15,walltime=48:00:00,pmem=8gb
 #PBS -V
 
 # Set output and error directories
@@ -21,4 +21,4 @@ if [ -d "$PBS_O_WORKDIR" ]; then
     echo "Running from $PBS_O_WORKDIR"
 fi
 
-python paper_sim_var_complexity_forest_flux.py
+python run_var_forest_para.py

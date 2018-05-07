@@ -13,7 +13,7 @@ p = 2
 
 low_constant = 1
 high_constant = 10
-std = 2
+std = 1
 
 high_area = [[0.75,1],[0.75,1]]
 

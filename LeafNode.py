@@ -52,7 +52,7 @@ class LeafNode:
         print_list = [[round(x[0],sig_fig), round(x[1], sig_fig)] for x in self.linear_dims]
         return print_list
     
-    def pick_new_points(self, num_samples, self_update = True, set_seed = None):
+    def pick_new_points(self, num_samples, self_update = False, set_seed = None):
         '''Returns the index of points to get labels for, and automatically adds
         them the leafs labelled points by default
         '''

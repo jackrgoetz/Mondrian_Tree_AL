@@ -755,15 +755,17 @@ class Mondrian_Tree:
             self.al_calculate_leaf_proportions()
             print('Done!')
 
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.al_calculate_leaf_number_new_labels(num_samples_total)
         num_samples_left = num_samples_total - self._num_labelled
 
         point_prob_list = [None] * self._num_points
         for i, node in enumerate(self._full_leaf_list):
-            num_already = len(node.labelled_index)
-            num_expected = num_samples_total * self._al_proportions[i]
+            num_needed = self._al_leaf_number_new_labels[i]
             for ind in node.unlabelled_index:
                 point_prob_list[ind] = max(0,
-                    (num_expected - num_already)/(num_samples_left*len(node.unlabelled_index)))
+                    (num_needed)/(num_samples_left*len(node.unlabelled_index)))
 
         # print(point_prob_list)
         tot = sum([x for x in point_prob_list if x is not None])

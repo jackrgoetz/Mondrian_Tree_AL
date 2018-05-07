@@ -1,4 +1,4 @@
-from data_sets.toy_data_var import toy_data_var
+from data_sets.toy_data_var_complexity import toy_data_var_complexity
 from Mondrian_Tree import Mondrian_Tree
 from sklearn.tree import DecisionTreeRegressor
 
@@ -8,23 +8,27 @@ import matplotlib
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import copy
+import random
 
 n_points = 40000
 n_test_points = 5000
-# n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 n_finals = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 p = 10
 marginal = 'uniform'
+max_uniform = 4
 
 # n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 # p = 5
 
-data_seeds = [x * 11 for x in range(9)]
-tree_seeds = [x * 13 for x in range(9)]
+data_seeds = [x * 11 for x in range(5)]
+tree_seeds = [x * 13 for x in range(5)]
 
-constant = 0
-low_std = 1
-high_std = 5
+std = 1
+low_freq = 0.1
+high_freq = 0.05
+
+low_mag = 10
+high_mag = 20
 
 high_area = [[0.5,1]]*p
 
@@ -43,8 +47,9 @@ for n_final_ind, n_final in enumerate(n_finals):
 
     for data_seed in data_seeds:
 
-        X, y = toy_data_var(n=n_points,p=p,high_area=high_area,constant=constant,
-            low_std=low_std,high_std=high_std, set_seed=data_seed, marginal=marginal)
+        X, y, true_labels = toy_data_var_complexity(n=n_points,p=p,high_area=high_area,std=std,
+            low_freq=low_freq,high_freq=high_freq, low_mag=low_mag, high_mag=high_mag, 
+            set_seed=data_seed, marginal=marginal, return_true_labels=True)
 
         X = np.array(X)
         y = np.array(y)
@@ -63,8 +68,9 @@ for n_final_ind, n_final in enumerate(n_finals):
         X = X[cv_ind,:]
         y = y[cv_ind]
 
-        X_test, y_test = toy_data_var(n=n_test_points,p=p,high_area=high_area,constant=constant,
-            low_std=low_std,high_std=high_std, set_seed=data_seed+1,marginal=marginal)
+        X_test, y_test = toy_data_var_complexity(n=n_points,p=p,high_area=high_area,std=std,
+            low_freq=low_freq,high_freq=high_freq, low_mag=low_mag, high_mag=high_mag, 
+            set_seed=data_seed+1)
 
         X_test = np.array(X_test)
         y_test = np.array(y_test)
@@ -92,10 +98,28 @@ for n_final_ind, n_final in enumerate(n_finals):
             MT_al.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
             MT_rn = copy.deepcopy(MT_al)
 
-            MT_al.input_data(X, range(n_start), y[:n_start])
+            MT_al.input_data(X, [], [])
             MT_al.make_full_leaf_list()
+
+            counter = 0
+            biggest_leaf = 0
+            temp_labelled = []
+            while MT_al._num_labelled < n_start and biggest_leaf < max_uniform+1:
+                curr_node = MT_al._full_leaf_list[counter % MT_al._num_leaves]
+                if len(curr_node.unlabelled_index) > 0:
+                    temp_ind = curr_node.pick_new_points(1)[0]
+                    temp_labelled.append(temp_ind)
+                    MT_al.label_point(temp_ind, y[temp_ind])
+                    if len(curr_node.labelled_index) > biggest_leaf:
+                        biggest_leaf = len(curr_node.labelled_index)
+                counter += 1
+
+            remaining_ind = [x for x in range(n_points) if x not in temp_labelled]
+            rest_ind = random.sample(remaining_ind, n_start - MT_al._num_labelled)
+            for ind in rest_ind:
+                MT_al.label_point(ind, y[ind])
             MT_al.make_full_leaf_var_list()
-            MT_al.al_set_default_var_global_var()
+            # MT_al.al_set_default_var_global_var()
             # print(MT_al.al_default_var)
 
             MT_al.al_calculate_leaf_proportions()
@@ -117,6 +141,8 @@ for n_final_ind, n_final in enumerate(n_finals):
                     MT_al.label_point(ind, y[ind])
 
             MT_al.set_default_pred_global_mean()
+
+            all_al_labelled = temp_labelled + rest_ind + new_labelled_points
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -140,7 +166,7 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             # MT_oracle
 
-            MT_oracle_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test)**2)
+            # MT_oracle_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test)**2)
 
             # print('Done MT_oracle')
 
@@ -172,7 +198,7 @@ for n_final_ind, n_final in enumerate(n_finals):
             # BT_al
 
             BT_al = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_al._num_leaves+1)
-            BT_al.fit(X[list(range(n_start)) + new_labelled_points,:], y[list(range(n_start)) + new_labelled_points])
+            BT_al.fit(X[all_al_labelled,:], y[all_al_labelled])
             BT_al_preds = BT_al.predict(X_test)
             BT_al_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - BT_al_preds)**2)
             # print('Done BT_al')
@@ -193,14 +219,14 @@ for n_final_ind, n_final in enumerate(n_finals):
 
 MT_al_MSE = MT_al_MSE/(len(data_seeds) * len(tree_seeds))
 MT_rn_MSE = MT_rn_MSE/(len(data_seeds) * len(tree_seeds))
-MT_oracle_MSE = MT_oracle_MSE/(len(data_seeds) * len(tree_seeds))
+# MT_oracle_MSE = MT_oracle_MSE/(len(data_seeds) * len(tree_seeds))
 MT_uc_MSE = MT_uc_MSE/(len(data_seeds) * len(tree_seeds))
 
 BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
 BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
 BT_uc_MSE = BT_uc_MSE/(len(data_seeds) * len(tree_seeds))
 
-np.savez('graphs/sim_heteroskedastic_uc_' + str(p) + '_' + 
+np.savez('graphs/sim_var_complexity_even_' + str(p) + '_' + 
     str(len(data_seeds) * len(tree_seeds)) + '.npz', 
     MT_al_MSE=MT_al_MSE, MT_rn_MSE=MT_rn_MSE, MT_oracle_MSE=MT_oracle_MSE, 
     MT_uc_MSE=MT_uc_MSE, BT_uc_MSE=BT_uc_MSE,
@@ -211,8 +237,8 @@ f, axarr = plt.subplots(2, sharex=True)
 mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active sampling')
 mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random sampling')
 mt_uc = axarr[0].plot(n_finals, MT_uc_MSE, color = 'green', label = 'Mondrian Tree - Uncertainty sampling')
-mt_oracle = axarr[0].plot(n_finals, MT_oracle_MSE, color = 'black', label='Oracle Mondrian Tree')
-axarr[0].set_title('Heteroskedastic simulation')
+# mt_oracle = axarr[0].plot(n_finals, MT_oracle_MSE, color = 'black', label='Oracle Mondrian Tree')
+axarr[0].set_title('Vary complexity simulation')
 axarr[0].legend(loc='best')
 
 bt_al = axarr[1].plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
@@ -227,5 +253,5 @@ f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
 f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
 
 plt.tight_layout()
-plt.savefig('graphs/sim_heteroskedastic_uc_' + str(p) + '_' + 
+plt.savefig('graphs/sim_var_complexity_even_' + str(p) + '_' + 
     str(len(data_seeds) * len(tree_seeds)) + '.pdf')

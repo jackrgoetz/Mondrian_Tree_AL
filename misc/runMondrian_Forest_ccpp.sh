@@ -4,7 +4,7 @@
 #PBS -A tewaria_fluxm
 #PBS -q fluxm
 #PBS -l qos=flux
-#PBS -l nodes=1:ppn=1,walltime=1:00:00,pmem=8gb
+#PBS -l nodes=1:ppn=15,walltime=48:00:00,pmem=8gb
 #PBS -V
 
 # Set output and error directories
@@ -21,4 +21,4 @@ if [ -d "$PBS_O_WORKDIR" ]; then
     echo "Running from $PBS_O_WORKDIR"
 fi
 
-python paper_ccpp_forest_flux.py
+python run_ccpp_forest_para.py
