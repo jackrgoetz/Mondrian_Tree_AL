@@ -19,17 +19,17 @@ marginal = 'uniform'
 # n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 # p = 5
 
-data_seeds = [x * 11 for x in range(1)]
-tree_seeds = [x * 13 for x in range(1)]
+data_seeds = [x * 11 for x in range(10)]
+tree_seeds = [x * 13 for x in range(10)]
 
 std = 1
 low_freq = 0.1
 high_freq = 0.05
 
-low_mag = 10
+low_mag = 5
 high_mag = 20
 
-high_area = [[0.5,1]]*p
+high_area = [[0.1,1]]*p
 
 MT_al_MSE = np.zeros([len(n_finals)])
 MT_rn_MSE = np.zeros([len(n_finals)])
@@ -143,13 +143,13 @@ for n_final_ind, n_final in enumerate(n_finals):
 
             # print('Done MT_rn')
 
-            MT_oracle.input_data(X, range(n_points), true_labels)
-            MT_oracle.set_default_pred_global_mean()
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                MT_oracle_preds = MT_oracle.predict(X_test)
-            MT_oracle_preds = np.array(MT_oracle_preds)
-            MT_oracle_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - MT_oracle_preds)**2)
+            # MT_oracle.input_data(X, range(n_points), true_labels)
+            # MT_oracle.set_default_pred_global_mean()
+            # with warnings.catch_warnings():
+            #     warnings.simplefilter("ignore")
+            #     MT_oracle_preds = MT_oracle.predict(X_test)
+            # MT_oracle_preds = np.array(MT_oracle_preds)
+            # MT_oracle_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - MT_oracle_preds)**2)
 
             # MT_uc
 
@@ -218,7 +218,7 @@ f, axarr = plt.subplots(2, sharex=True)
 mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active sampling')
 mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random sampling')
 mt_uc = axarr[0].plot(n_finals, MT_uc_MSE, color = 'green', label = 'Mondrian Tree - Uncertainty sampling')
-mt_oracle = axarr[0].plot(n_finals, MT_oracle_MSE, color = 'black', label='Oracle Mondrian Tree')
+# mt_oracle = axarr[0].plot(n_finals, MT_oracle_MSE, color = 'black', label='Oracle Mondrian Tree')
 axarr[0].set_title('Varying complexity simulation')
 axarr[0].legend(loc='best')
 
