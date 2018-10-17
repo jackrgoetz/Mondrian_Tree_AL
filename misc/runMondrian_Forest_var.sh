@@ -4,7 +4,7 @@
 #PBS -A stats_flux
 #PBS -q flux
 #PBS -l qos=flux
-#PBS -l nodes=1:ppn=15,walltime=48:00:00,pmem=8gb
+#PBS -l nodes=1:ppn=15,walltime=100:00:00,pmem=8gb
 #PBS -V
 
 # Set output and error directories

@@ -45,7 +45,7 @@ class test_LeafNode(unittest.TestCase):
 
     def test_pick_new_points_good(self):
         self.assertEqual(self.test_leaf_good.pick_new_points(1, set_seed=1),[6])
-        self.assertEqual(self.test_leaf_good.pick_new_points(2, set_seed=1),[7,5])
+        self.assertEqual(self.test_leaf_good.pick_new_points(2, set_seed=1),[6,9])
 
     def test_pick_new_points_good_all(self):
         self.assertEqual(self.test_leaf_good.pick_new_points(6, set_seed=1),[6,9,5,10,8,7])
@@ -55,7 +55,7 @@ class test_LeafNode(unittest.TestCase):
             self.test_leaf_empty.pick_new_points(1)
 
     def test_pick_new_points_self_update_true(self):
-        self.test_leaf_good.pick_new_points(1, set_seed=1)
+        self.test_leaf_good.pick_new_points(1, self_update = True, set_seed=1)
         self.assertEqual(self.test_leaf_good.labelled_index,[1,2,3,4,6])
         self.assertEqual(self.test_leaf_good.unlabelled_index,[5,7,8,9,10])
 

@@ -179,8 +179,8 @@ class test_Mondrian_Forest(unittest.TestCase):
         lbda = 0.5
         self.mf.update_life_time(lbda, set_seeds=list(range(self.n_tree)))
         self.mf.input_data(self.data, self.labelled_indices, self.labels)
-        self.mf.al_average_point_probabilities_adjustment(10)
-        self.assertEqual(sum(self.mf._al_avg_weights_adjustment),1)
+        self.mf.al_average_point_probabilities_adjustment(21)
+        self.assertAlmostEqual(sum(self.mf._al_avg_weights_adjustment),1)
 
 
 

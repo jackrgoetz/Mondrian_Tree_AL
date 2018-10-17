@@ -17,7 +17,7 @@ f, axarr = plt.subplots(3, sharex=True)
 mt_al = axarr[0].plot(n_finals, mt_vals['MT_al_MSE'], color = 'red', label='Mondrian Tree - Active sampling')
 mt_rn = axarr[0].plot(n_finals, mt_vals['MT_rn_MSE'], color = 'blue', label = 'Mondrian Tree - Random sampling')
 mt_uc = axarr[0].plot(n_finals, mt_vals['MT_uc_MSE'], color = 'green', label = 'Mondrian Tree - Uncertainty sampling')
-axarr[0].set_title('Varying complexity simulation', fontsize = 14)
+axarr[0].set_title('Varying complexity sim. m = 40000, d = 10', fontsize = 14)
 # axarr[0].legend(loc='upper right')
 
 mf_al = axarr[1].plot(n_finals, fr_vals['MT_al_MSE'], color = 'red', linestyle = '--',

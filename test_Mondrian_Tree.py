@@ -772,8 +772,9 @@ class test_Mondrian_Tree(unittest.TestCase):
     def test_al_calculate_point_probabilities_adjustment_empty(self):
         with self.assertWarns(UserWarning):
             self.mt1.al_calculate_leaf_proportions()
+        with self.assertRaises(ValueError):
             self.mt1.al_calculate_point_probabilities_adjustment(1)
-        self.assertEqual(self.mt1._al_point_weights_adjustment,[])
+        self.assertEqual(self.mt1._al_point_weights_adjustment,None)
 
     def test_al_calculate_point_probabilities_adjustment_root(self):
         self.mt1.input_data(self.data, self.labelled_indices, self.labels)

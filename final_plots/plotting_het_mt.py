@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 # n_finals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 
-mt_vals = dict(np.load('sim_heteroskedastic_uc_10_2500.npz'))
+mt_vals = dict(np.load('sim_heteroskedastic_uc_10_4900.npz'))
 # fr_vals = dict(np.load('sim_het_forest_484.npz'))
 
 # print(mt_vals)
@@ -17,7 +17,7 @@ f, axarr = plt.subplots(2, sharex=True)
 mt_al = axarr[0].plot(n_finals, mt_vals['MT_al_MSE'], color = 'red', label='MT - Active')
 mt_rn = axarr[0].plot(n_finals, mt_vals['MT_rn_MSE'], color = 'blue', label = 'MT - Random')
 mt_uc = axarr[0].plot(n_finals, mt_vals['MT_uc_MSE'], color = 'green', label = 'MT - Uncertainty')
-axarr[0].set_title('Heteroskedastic simulation', fontsize = 12)
+axarr[0].set_title('Heteroskedastic sim. m = 40000, d = 10', fontsize = 12)
 axarr[0].legend(loc='upper right', fontsize = 8)
 
 mf_al = axarr[1].plot(n_finals, mt_vals['BT_al_MSE'], color = 'red', linestyle = '--',

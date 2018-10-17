@@ -14,17 +14,17 @@ mt_vals = dict(np.load('sim_cl_forest_900.npz'))
 
 f, axarr = plt.subplots(2, sharex=True)
 
-mt_al = axarr[0].plot(n_finals, mt_vals['MT_al_MSE'], color = 'red', label='Mondrian Tree - Active sampling')
-mt_rn = axarr[0].plot(n_finals, mt_vals['MT_rn_MSE'], color = 'blue', label = 'Mondrian Tree - Random sampling')
-mt_uc = axarr[0].plot(n_finals, mt_vals['MT_uc_MSE'], color = 'green', label = 'Mondrian Tree - Uncertainty sampling')
+mt_al = axarr[0].plot(n_finals[:7], mt_vals['MT_al_MSE'][:7], color = 'red', label='Mondrian Tree - Active sampling')
+mt_rn = axarr[0].plot(n_finals[:7], mt_vals['MT_rn_MSE'][:7], color = 'blue', label = 'Mondrian Tree - Random sampling')
+mt_uc = axarr[0].plot(n_finals[:7], mt_vals['MT_uc_MSE'][:7], color = 'green', label = 'Mondrian Tree - Uncertainty sampling')
 axarr[0].set_title('Cl experiment', fontsize = 12)
 # axarr[0].legend(loc='upper right')
 
-mf_al = axarr[1].plot(n_finals, mt_vals['BT_al_MSE'], color = 'red', linestyle = '--',
+mf_al = axarr[1].plot(n_finals[:7], mt_vals['BT_al_MSE'][:7], color = 'red', linestyle = '--',
  label='Mondrian Forest - Active sampling')
-mf_rn = axarr[1].plot(n_finals, mt_vals['BT_rn_MSE'], color = 'blue', linestyle = '--',
+mf_rn = axarr[1].plot(n_finals[:7], mt_vals['BT_rn_MSE'][:7], color = 'blue', linestyle = '--',
  label = 'Mondrian Forest - Random sampling')
-mf_uc = axarr[1].plot(n_finals, mt_vals['BT_uc_MSE'], color = 'green', linestyle = '--',
+mf_uc = axarr[1].plot(n_finals[:7], mt_vals['BT_uc_MSE'][:7], color = 'green', linestyle = '--',
  label = 'Mondrian Forest - Uncertainty sampling')
 # axarr[1].legend(loc='upper right')
 

@@ -7,7 +7,7 @@ n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 # n_finals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 
 # mt_vals = dict(np.load('sim_heteroskedastic_uc_10_2500.npz'))
-mt_vals = dict(np.load('sim_het_forest_484.npz'))
+mt_vals = dict(np.load('sim_het_forest_625.npz'))
 
 # print(mt_vals)
 # print(fr_vals)

@@ -17,7 +17,7 @@ f, axarr = plt.subplots(3, sharex=True)
 mt_al = axarr[0].plot(n_finals, mt_vals['MT_al_MSE'], color = 'red', label='MT - Active')
 mt_rn = axarr[0].plot(n_finals, mt_vals['MT_rn_MSE'], color = 'blue', label = 'MT - Random')
 mt_uc = axarr[0].plot(n_finals, mt_vals['MT_uc_MSE'], color = 'green', label = 'MT - Uncertainty')
-axarr[0].set_title('Heteroskedastic simulation', fontsize = 14)
+axarr[0].set_title('Heteroskedastic simu. m = 40000, d = 10', fontsize = 14)
 axarr[0].legend(loc='upper right', fontsize = 8)
 
 mf_al = axarr[1].plot(n_finals, fr_vals['MT_al_MSE'], color = 'red', linestyle = '--',
