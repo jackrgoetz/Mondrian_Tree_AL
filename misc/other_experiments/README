@@ -1,0 +1,14 @@
+Other experiments and things I tried and looked at. Some examples are:
+
+Simulations when the data is piecewise linear
+Using more than 2 stages during the active learning
+Using the active learning algorithm, but with a Breiman Tree instead 
+Mondrian Tree.
+Beginning with equal amount of data in each leaf, rather than randomly
+sampling to start with.
+Looking at the variance of the mean estimate (conditioned on the variance
+of the sample being higher or lower than the population variance) for 
+univariate distributions. 
+
+These scripts may have bugs, are not well commented, and will not run
+from their current location. 
