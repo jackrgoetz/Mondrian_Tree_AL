@@ -1,11 +1,11 @@
 import random
 import copy
-import utils
 import warnings
 import math
 
-from LeafNode import LeafNode
-from SplitNode import SplitNode
+import core.utils as utils
+from core.LeafNode import LeafNode
+from core.SplitNode import SplitNode
 
 class Mondrian_Tree:
 

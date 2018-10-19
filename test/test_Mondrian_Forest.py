@@ -2,13 +2,13 @@ import unittest
 import math
 import random
 import warnings
-import utils
 
 import numpy as np
 
+import core.utils as utils
 from Mondrian_Forest import Mondrian_Forest
 from Mondrian_Tree import Mondrian_Tree
-from LeafNode import LeafNode
+from core.LeafNode import LeafNode
 
 class test_Mondrian_Forest(unittest.TestCase):
 

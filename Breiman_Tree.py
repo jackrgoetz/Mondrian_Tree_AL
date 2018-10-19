@@ -1,7 +1,7 @@
 from sklearn.tree import DecisionTreeRegressor
 from collections import Counter
 
-import utils
+import core.utils as utils
 import numpy as np
 import matplotlib
 matplotlib.use('AGG')
