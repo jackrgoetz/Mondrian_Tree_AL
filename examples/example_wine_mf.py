@@ -12,11 +12,11 @@ import math
 def example_wine_mf():
 
     n_finals = [200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
-    n_tree = 2
+    n_tree = 10
     # n_finals = [2000]
 
-    data_seeds = [x * 11 for x in range(2)]
-    tree_seeds = [x * 13 for x in range(2)]
+    data_seeds = [x * 11 for x in range(5)]
+    tree_seeds = [x * 13 for x in range(5)]
 
     MT_al_MSE = np.zeros([len(n_finals)])
     MT_rn_MSE = np.zeros([len(n_finals)])

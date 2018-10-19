@@ -41,4 +41,4 @@ f.text(0.5, 0.01, 'Final number of labelled points', ha='center', fontsize = 12)
 
 # plt.tight_layout()
 f.set_size_inches(4.5, 4.5)
-plt.savefig('var_final_mt.pdf')
+plt.savefig('final_plots/var_final_mt.pdf')
