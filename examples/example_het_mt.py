@@ -1,4 +1,4 @@
-from data_sets.toy_data_var_complexity import toy_data_var_complexity
+from data_sets.toy_data_var import toy_data_var
 from Mondrian_Tree import Mondrian_Tree
 from sklearn.tree import DecisionTreeRegressor
 
@@ -8,13 +8,13 @@ import matplotlib
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import copy
-import math
 
-def example_var_complexity_mt():
+def example_het_mt():
 
     n_points = 40000
     n_test_points = 5000
-    n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
+    # n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
+    n_finals = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     p = 10
     marginal = 'uniform'
 
@@ -24,14 +24,11 @@ def example_var_complexity_mt():
     data_seeds = [x * 11 for x in range(2)]
     tree_seeds = [x * 13 for x in range(2)]
 
-    std = 1
-    low_freq = 0.1
-    high_freq = 0.05
+    constant = 0
+    low_std = 1
+    high_std = 5
 
-    low_mag = 5
-    high_mag = 20
-
-    high_area = [[0.1,1]]*p
+    high_area = [[0.5,1]]*p
 
     MT_al_MSE = np.zeros([len(n_finals)])
     MT_rn_MSE = np.zeros([len(n_finals)])
@@ -48,12 +45,15 @@ def example_var_complexity_mt():
 
         for data_seed in data_seeds:
 
-            X, y, true_labels = toy_data_var_complexity(n=n_points,p=p,high_area=high_area,std=std,
-                low_freq=low_freq,high_freq=high_freq, low_mag=low_mag, high_mag=high_mag, 
-                set_seed=data_seed, marginal=marginal, return_true_labels=True)
+            X, y = toy_data_var(n=n_points,p=p,high_area=high_area,constant=constant,
+                low_std=low_std,high_std=high_std, set_seed=data_seed, marginal=marginal)
 
             X = np.array(X)
             y = np.array(y)
+
+            # plt.scatter(X[:,0], X[:,1], c=y)
+            # plt.show()
+            # sys.exit()
 
             np.random.seed(data_seed)
 
@@ -65,9 +65,8 @@ def example_var_complexity_mt():
             X = X[cv_ind,:]
             y = y[cv_ind]
 
-            X_test, y_test = toy_data_var_complexity(n=n_points,p=p,high_area=high_area,std=std,
-                low_freq=low_freq,high_freq=high_freq, low_mag=low_mag, high_mag=high_mag, 
-                set_seed=data_seed+1)
+            X_test, y_test = toy_data_var(n=n_test_points,p=p,high_area=high_area,constant=constant,
+                low_std=low_std,high_std=high_std, set_seed=data_seed+1,marginal=marginal)
 
             X_test = np.array(X_test)
             y_test = np.array(y_test)
@@ -81,8 +80,7 @@ def example_var_complexity_mt():
                 MT_al = Mondrian_Tree([[0,1]]*p)
                 MT_al.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
                 MT_rn = copy.deepcopy(MT_al)
-                MT_oracle = copy.deepcopy(MT_al)
-                
+
                 MT_al.input_data(X, range(n_start), y[:n_start])
                 MT_al.make_full_leaf_list()
                 MT_al.make_full_leaf_var_list()
@@ -126,6 +124,14 @@ def example_var_complexity_mt():
                     MT_rn_preds = MT_rn.predict(X_test)
                 MT_rn_preds = np.array(MT_rn_preds)
                 MT_rn_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - MT_rn_preds)**2)
+
+                # print('Done MT_rn')
+
+                # MT_oracle
+
+                MT_oracle_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test)**2)
+
+                # print('Done MT_oracle')
 
                 # MT_uc
 
@@ -183,7 +189,7 @@ def example_var_complexity_mt():
     BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
     BT_uc_MSE = BT_uc_MSE/(len(data_seeds) * len(tree_seeds))
 
-    np.savez('graphs/var_complexity_mt' + 
+    np.savez('graphs/het_mt_' + 
         str(len(data_seeds) * len(tree_seeds)) + '.npz', 
         MT_al_MSE=MT_al_MSE, MT_rn_MSE=MT_rn_MSE, MT_oracle_MSE=MT_oracle_MSE, 
         MT_uc_MSE=MT_uc_MSE, BT_uc_MSE=BT_uc_MSE,
@@ -194,7 +200,8 @@ def example_var_complexity_mt():
     mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active sampling')
     mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random sampling')
     mt_uc = axarr[0].plot(n_finals, MT_uc_MSE, color = 'green', label = 'Mondrian Tree - Uncertainty sampling')
-    axarr[0].set_title('Varying complexity simulation')
+    mt_oracle = axarr[0].plot(n_finals, MT_oracle_MSE, color = 'black', label='Oracle Mondrian Tree')
+    axarr[0].set_title('Heteroskedastic simulation')
     axarr[0].legend(loc='best')
 
     bt_al = axarr[1].plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
@@ -209,5 +216,5 @@ def example_var_complexity_mt():
     f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
 
     plt.tight_layout()
-    plt.savefig('graphs/var_complexity_mt' + 
+    plt.savefig('graphs/het_mt_' + 
         str(len(data_seeds) * len(tree_seeds)) + '.pdf')

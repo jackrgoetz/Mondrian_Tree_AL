@@ -1,4 +1,3 @@
-from data_sets.toy_data_var_complexity import toy_data_var_complexity
 from Mondrian_Tree import Mondrian_Tree
 from sklearn.tree import DecisionTreeRegressor
 
@@ -8,52 +7,97 @@ import matplotlib
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import copy
-import math
 
-def example_var_complexity_mt():
+def example_concrete_mt():
 
-    n_points = 40000
-    n_test_points = 5000
-    n_finals = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
-    p = 10
-    marginal = 'uniform'
-
-    # n_finals = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
-    # p = 5
+    n_finals = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+    # n_finals = [2000]
 
     data_seeds = [x * 11 for x in range(2)]
     tree_seeds = [x * 13 for x in range(2)]
 
-    std = 1
-    low_freq = 0.1
-    high_freq = 0.05
-
-    low_mag = 5
-    high_mag = 20
-
-    high_area = [[0.1,1]]*p
-
     MT_al_MSE = np.zeros([len(n_finals)])
     MT_rn_MSE = np.zeros([len(n_finals)])
-    MT_oracle_MSE = np.zeros([len(n_finals)])
     MT_uc_MSE = np.zeros([len(n_finals)])
 
     BT_al_MSE = np.zeros([len(n_finals)])
     BT_rn_MSE = np.zeros([len(n_finals)])
     BT_uc_MSE = np.zeros([len(n_finals)])
 
+    def scale_zero_one(col):
+
+        offset = min(col)
+        scale = max(col) - min(col)
+
+        col = (col - offset)/scale
+        return(col)
+
+    ccpp_data = np.genfromtxt('data_sets/concrete.csv', delimiter = ',')
+
+    X = ccpp_data[:,:-1]
+    for i in range(X.shape[1]):
+        X[:,i] = scale_zero_one(X[:,i])
+
+    y = ccpp_data[:,-1]
+
+    n,p = X.shape
+
+    print(n, p)
+
     for n_final_ind, n_final in enumerate(n_finals):
+
+        # Saving results during run
+
+        if n_final_ind > 1:
+
+            MT_al_MSE_temp = MT_al_MSE/(len(data_seeds) * len(tree_seeds))
+            MT_rn_MSE_temp = MT_rn_MSE/(len(data_seeds) * len(tree_seeds))
+            MT_uc_MSE_temp = MT_uc_MSE/(len(data_seeds) * len(tree_seeds))
+
+            BT_al_MSE_temp = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
+            BT_rn_MSE_temp = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
+            BT_uc_MSE_temp = BT_uc_MSE/(len(data_seeds) * len(tree_seeds))
+
+            np.savez('graphs/concrete_mt_' + 
+                str(len(data_seeds) * len(tree_seeds)) + '.npz', 
+                MT_al_MSE=MT_al_MSE_temp, MT_rn_MSE=MT_rn_MSE_temp, 
+                MT_uc_MSE=MT_uc_MSE_temp, BT_uc_MSE=BT_uc_MSE_temp,
+                BT_al_MSE=BT_al_MSE_temp, BT_rn_MSE=BT_rn_MSE_temp)
+
+            f, axarr = plt.subplots(2, sharex=True)
+
+            mt_al = axarr[0].plot(n_finals[:n_final_ind], MT_al_MSE_temp[:n_final_ind], 
+                color = 'red', label='Mondrian Tree - Active sampling')
+            mt_rn = axarr[0].plot(n_finals[:n_final_ind], MT_rn_MSE_temp[:n_final_ind], 
+                color = 'blue', label = 'Mondrian Tree - Random sampling')
+            mt_uc = axarr[0].plot(n_finals[:n_final_ind], MT_uc_MSE_temp[:n_final_ind], 
+                color = 'green', label = 'Mondrian Tree - Uncertainty sampling')
+            axarr[0].set_title('Concrete experiment')
+            axarr[0].legend(loc='best')
+
+            bt_al = axarr[1].plot(n_finals[:n_final_ind], BT_al_MSE_temp[:n_final_ind], 
+                color = 'red', linestyle = '--', label = 'Breiman Tree - Active sampling')
+            bt_rn = axarr[1].plot(n_finals[:n_final_ind], BT_rn_MSE_temp[:n_final_ind], 
+                color = 'blue', linestyle = '--',label = 'Breiman Tree - Random sampling')
+            bt_rn = axarr[1].plot(n_finals[:n_final_ind], BT_uc_MSE_temp[:n_final_ind], 
+                color = 'green', linestyle = '--',label = 'Breiman Tree - Uncertainty sampling')
+            axarr[1].legend(loc='best')
+
+            f.text(0.01, 0.5, 'MSE', va='center', rotation='vertical')
+            f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
+
+            plt.tight_layout()
+            plt.savefig('graphs/concrete_mt_' + 
+                str(len(data_seeds) * len(tree_seeds)) + '.pdf')
+
 
         n_start = int(n_final/2)
 
         for data_seed in data_seeds:
 
-            X, y, true_labels = toy_data_var_complexity(n=n_points,p=p,high_area=high_area,std=std,
-                low_freq=low_freq,high_freq=high_freq, low_mag=low_mag, high_mag=high_mag, 
-                set_seed=data_seed, marginal=marginal, return_true_labels=True)
-
-            X = np.array(X)
-            y = np.array(y)
+            # plt.scatter(X[:,0], X[:,1], c=y)
+            # plt.show()
+            # sys.exit()
 
             np.random.seed(data_seed)
 
@@ -65,12 +109,8 @@ def example_var_complexity_mt():
             X = X[cv_ind,:]
             y = y[cv_ind]
 
-            X_test, y_test = toy_data_var_complexity(n=n_points,p=p,high_area=high_area,std=std,
-                low_freq=low_freq,high_freq=high_freq, low_mag=low_mag, high_mag=high_mag, 
-                set_seed=data_seed+1)
-
-            X_test = np.array(X_test)
-            y_test = np.array(y_test)
+            X_test = X[cv_ind[n_start:],:]
+            y_test = y[cv_ind[n_start:]]
 
             for tree_seed in tree_seeds:
 
@@ -79,11 +119,12 @@ def example_var_complexity_mt():
                 # MT_al and labels for BT_al
 
                 MT_al = Mondrian_Tree([[0,1]]*p)
-                MT_al.update_life_time(n_final**(1/(2+p))-1, set_seed=tree_seed)
+                MT_al.update_life_time((n_final**(1/(2+p))-1), set_seed=tree_seed)
                 MT_rn = copy.deepcopy(MT_al)
-                MT_oracle = copy.deepcopy(MT_al)
-                
+
+                # print(MT_al._num_leaves)
                 MT_al.input_data(X, range(n_start), y[:n_start])
+
                 MT_al.make_full_leaf_list()
                 MT_al.make_full_leaf_var_list()
                 MT_al.al_set_default_var_global_var()
@@ -127,6 +168,8 @@ def example_var_complexity_mt():
                 MT_rn_preds = np.array(MT_rn_preds)
                 MT_rn_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - MT_rn_preds)**2)
 
+                # print('Done MT_rn')
+
                 # MT_uc
 
                 new_labelled_points_uc = []
@@ -152,6 +195,7 @@ def example_var_complexity_mt():
                 MT_uc_preds = np.array(MT_uc_preds)
                 MT_uc_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - MT_uc_preds)**2)
 
+
                 # BT_al
 
                 BT_al = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_al._num_leaves+1)
@@ -160,32 +204,29 @@ def example_var_complexity_mt():
                 BT_al_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - BT_al_preds)**2)
                 # print('Done BT_al')
 
-                # BT_rn
-
                 BT_rn = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_rn._num_leaves+1)
                 BT_rn.fit(X[list(range(n_final)),:], y[list(range(n_final))])
                 BT_rn_preds = BT_rn.predict(X_test)
                 BT_rn_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - BT_rn_preds)**2)
-                # print('Done BT_rn')
 
                 # BT_uc
                 BT_uc = DecisionTreeRegressor(random_state=tree_seed, max_leaf_nodes = MT_uc._num_leaves+1)
                 BT_uc.fit(X[list(range(n_start)) + new_labelled_points_uc,:], y[list(range(n_start)) + new_labelled_points_uc])
                 BT_uc_preds = BT_uc.predict(X_test)
                 BT_uc_MSE[n_final_ind] += sum(1/X_test.shape[0]*(y_test - BT_uc_preds)**2)
+                # print('Done BT_rn')
 
     MT_al_MSE = MT_al_MSE/(len(data_seeds) * len(tree_seeds))
     MT_rn_MSE = MT_rn_MSE/(len(data_seeds) * len(tree_seeds))
-    MT_oracle_MSE = MT_oracle_MSE/(len(data_seeds) * len(tree_seeds))
     MT_uc_MSE = MT_uc_MSE/(len(data_seeds) * len(tree_seeds))
 
     BT_al_MSE = BT_al_MSE/(len(data_seeds) * len(tree_seeds))
     BT_rn_MSE = BT_rn_MSE/(len(data_seeds) * len(tree_seeds))
     BT_uc_MSE = BT_uc_MSE/(len(data_seeds) * len(tree_seeds))
 
-    np.savez('graphs/var_complexity_mt' + 
+    np.savez('graphs/concrete_mt_' + 
         str(len(data_seeds) * len(tree_seeds)) + '.npz', 
-        MT_al_MSE=MT_al_MSE, MT_rn_MSE=MT_rn_MSE, MT_oracle_MSE=MT_oracle_MSE, 
+        MT_al_MSE=MT_al_MSE, MT_rn_MSE=MT_rn_MSE, 
         MT_uc_MSE=MT_uc_MSE, BT_uc_MSE=BT_uc_MSE,
         BT_al_MSE=BT_al_MSE, BT_rn_MSE=BT_rn_MSE)
 
@@ -194,7 +235,7 @@ def example_var_complexity_mt():
     mt_al = axarr[0].plot(n_finals, MT_al_MSE, color = 'red', label='Mondrian Tree - Active sampling')
     mt_rn = axarr[0].plot(n_finals, MT_rn_MSE, color = 'blue', label = 'Mondrian Tree - Random sampling')
     mt_uc = axarr[0].plot(n_finals, MT_uc_MSE, color = 'green', label = 'Mondrian Tree - Uncertainty sampling')
-    axarr[0].set_title('Varying complexity simulation')
+    axarr[0].set_title('Concrete experiment')
     axarr[0].legend(loc='best')
 
     bt_al = axarr[1].plot(n_finals, BT_al_MSE, color = 'red', linestyle = '--', 
@@ -209,5 +250,5 @@ def example_var_complexity_mt():
     f.text(0.5, 0.01, 'Final number of labelled points', ha='center')
 
     plt.tight_layout()
-    plt.savefig('graphs/var_complexity_mt' + 
+    plt.savefig('graphs/concrete_mt_' + 
         str(len(data_seeds) * len(tree_seeds)) + '.pdf')
