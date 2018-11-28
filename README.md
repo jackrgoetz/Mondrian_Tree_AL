@@ -1,4 +1,4 @@
-# Mondrian_Tree_AL
+# Active Learning for Non-Parametric Regression Using Purely Random Trees
 
 Algorithms and experiments for NeurIPS paper "Active Learning for Non-Parametric Regression 
 Using Purely Random Trees" available at:
