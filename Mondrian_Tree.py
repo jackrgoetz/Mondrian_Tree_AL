@@ -20,7 +20,11 @@ class Mondrian_Tree:
         partitions.
     '''
 
-    def __init__(self, linear_dims):
+    def __init__(self, linear_dims, seed=None):
+
+        if seed is not None:
+            random.seed(seed)
+            
         self._linear_dims = linear_dims
         self._root = LeafNode(linear_dims = self._linear_dims)
         self._num_dimensions = len(linear_dims)
