@@ -1,0 +1,6 @@
+After submission a small but was discovered by Yeqing Lin, where the naive uncertainty sampling 
+experiments were not correctly using the global variance in leaves with no data in stage 1, 
+instead using variance of 0 and ensuring these leaves did not get any samples during stage 2. 
+This bug did not result in qualitative differences (the theoretically justified proportions
+still performed better) but the naive uncertainty sampling scheme is slightly better than it 
+appears in the paper.
